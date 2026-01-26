@@ -21,4 +21,13 @@ public class GovScheme {
 
     @Column(columnDefinition = "TEXT")
     private String description;
-}
+
+    private String benefits;
+
+    private LocalDateTime deadline;
+
+    private String applicationLink;
+
+    private boolean isActive;
+    
+    }
