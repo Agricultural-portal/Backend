@@ -50,6 +50,11 @@ public class User {
     @Column(precision = 10, scale = 2)
     private BigDecimal money = BigDecimal.ZERO;
 
+    @Column(nullable = false)
+    private Boolean isDeleted = false;
+
+    private LocalDateTime deletedAt;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

@@ -15,6 +15,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     java.util.List<User> findByRole(com.pm.farm_backend.enums.Role role);
 
+    java.util.List<User> findByRoleAndIsDeleted(com.pm.farm_backend.enums.Role role, Boolean isDeleted);
+
     long countByRole(com.pm.farm_backend.enums.Role role);
 
     long countByRoleAndStatus(com.pm.farm_backend.enums.Role role,
