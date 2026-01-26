@@ -105,7 +105,7 @@ public class AuthService {
         user.setPincode(dto.getPincode());
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setRole(Role.ADMIN);
-        user.setStatus(AccountStatus.PENDING); // REQUIRES APPROVAL
+        user.setStatus(AccountStatus.ACTIVE); // REQUIRES APPROVAL
 
         userRepository.save(user);
     }
@@ -119,6 +119,11 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return jwtService.generateToken(new CustomUserDetails(user));
+        // Add user role to JWT claims
+        java.util.Map<String, Object> claims = new java.util.HashMap<>();
+        claims.put("role", user.getRole().name());
+        claims.put("userId", user.getId());
+
+        return jwtService.generateToken(claims, new CustomUserDetails(user));
     }
 }
