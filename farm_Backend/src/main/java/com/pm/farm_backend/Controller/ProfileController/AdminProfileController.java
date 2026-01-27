@@ -1,20 +1,24 @@
 package com.pm.farm_backend.Controller.ProfileController;
 
+import com.pm.farm_backend.Dto.authDto.UserUpdateRequest;
+import com.pm.farm_backend.Model.User;
 import com.pm.farm_backend.Service.ImageService;
 import com.pm.farm_backend.Service.ProfileService.AdminProfileService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/profile")
+@SecurityRequirement(name = "bearerAuth")
 public class AdminProfileController {
 
     @Autowired
@@ -23,7 +27,30 @@ public class AdminProfileController {
     @Autowired
     private AdminProfileService adminProfileService;
 
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<User> getProfile(Authentication authentication) {
+        String email = authentication.getName();
+        User user = adminProfileService.getProfile(email);
+        return ResponseEntity.ok(user);
+    }
+
+    @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateProfile(
+            @RequestBody UserUpdateRequest request,
+            Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            User updatedUser = adminProfileService.updateProfile(email, request);
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @PostMapping("/image")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateProfileImage(
             @RequestParam("image") MultipartFile image,
             Authentication authentication) {
@@ -32,7 +59,12 @@ public class AdminProfileController {
             String email = authentication.getName();
             String imageUrl = imageService.uploadImage(image);
             adminProfileService.updateProfileImage(email, imageUrl);
-            return ResponseEntity.ok("Profile image updated successfully");
+            
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Profile image updated successfully");
+            response.put("imageUrl", imageUrl);
+            
+            return ResponseEntity.ok(response);
         } catch (IOException e) {
             return ResponseEntity.status(500).body("Error uploading image: " + e.getMessage());
         } catch (RuntimeException e) {
