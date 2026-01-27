@@ -60,8 +60,6 @@ public class AuthService {
         // Check autoApproveFarmers setting
         SystemSettingsResponse settings = systemSettingsService.getSettings();
         user.setStatus(settings.getAutoApproveFarmers() ? AccountStatus.ACTIVE : AccountStatus.PENDING);
-        
-        user.setStatus(AccountStatus.PENDING); // CHANGED TO PENDING
         user.setCity(dto.getCity());
         user.setState(dto.getState());
         user.setAddresss(dto.getAddresss());

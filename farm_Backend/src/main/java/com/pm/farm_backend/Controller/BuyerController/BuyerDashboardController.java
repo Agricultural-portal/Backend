@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/buyer/dashboard")
 @PreAuthorize("hasRole('BUYER')")
-@CrossOrigin(origins = "*")
-public class DashboardController {
+public class BuyerDashboardController {
 
     @Autowired
     private BuyerDashboardService dashboardService;

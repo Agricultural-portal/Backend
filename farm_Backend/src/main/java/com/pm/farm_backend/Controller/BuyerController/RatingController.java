@@ -13,7 +13,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/buyer/ratings")
 @PreAuthorize("hasRole('BUYER')")
-@CrossOrigin(origins = "*")
 public class RatingController {
 
     @Autowired

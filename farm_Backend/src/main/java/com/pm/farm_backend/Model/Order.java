@@ -50,4 +50,12 @@ public class Order {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+    
+    // Additional getters for compatibility
+    public OrderStatus getStatus() { return status; }
+    public void setStatus(OrderStatus status) { this.status = status; }
+    public BigDecimal getTotalAmount() { return totalAmount; }
+    public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
+    public List<OrderItem> getItems() { return items; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 }

@@ -68,8 +68,8 @@ public class DashboardServiceImpl implements DashboardService {
         return users.stream()
             .map(user -> new DashboardStatsResponse.UserSummary(
                 user.getId(),
-                user.getFirst_name(),
-                user.getLast_name(),
+                user.getFirstName(),
+                user.getLastName(),
                 user.getEmail(),
                 user.getPhone(),
                 user.getCity(),

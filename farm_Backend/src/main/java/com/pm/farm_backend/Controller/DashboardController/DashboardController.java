@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/admin/dashboard")
-@Tag(name = "Dashboard", description = "Admin Dashboard Statistics APIs")
+@RequestMapping("/api/buyer/dashboard")
+@Tag(name = "Dashboard", description = "Buyer Dashboard Statistics APIs")
 @SecurityRequirement(name = "bearerAuth")
 public class DashboardController {
 
@@ -22,8 +22,8 @@ public class DashboardController {
     private DashboardService dashboardService;
 
     @GetMapping("/stats")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Get dashboard statistics", description = "Get all dashboard statistics including counts and recent users")
+    @PreAuthorize("hasRole('BUYER')")
+    @Operation(summary = "Get buyer dashboard statistics", description = "Get all buyer dashboard statistics including counts and recent orders")
     public ResponseEntity<DashboardStatsResponse> getDashboardStats() {
         DashboardStatsResponse stats = dashboardService.getDashboardStats();
         return ResponseEntity.ok(stats);

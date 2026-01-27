@@ -129,7 +129,7 @@ public class SystemSettingsServiceImpl implements SystemSettingsService {
         // Get updatedBy user name
         if (settings.getUpdatedBy() != null) {
             userRepository.findById(settings.getUpdatedBy()).ifPresent(user -> {
-                response.setUpdatedByName(user.getFirst_name() + " " + user.getLast_name());
+                response.setUpdatedByName(user.getFirstName() + " " + user.getLastName());
             });
         }
 

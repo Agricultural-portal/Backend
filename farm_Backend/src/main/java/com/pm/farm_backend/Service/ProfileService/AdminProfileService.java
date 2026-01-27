@@ -23,11 +23,11 @@ public class AdminProfileService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (request.getFirst_name() != null) {
-            user.setFirst_name(request.getFirst_name());
+        if (request.getFirstName() != null) {
+            user.setFirstName(request.getFirstName());
         }
-        if (request.getLast_name() != null) {
-            user.setLast_name(request.getLast_name());
+        if (request.getLastName() != null) {
+            user.setLastName(request.getLastName());
         }
         if (request.getPhone() != null) {
             user.setPhone(request.getPhone());
