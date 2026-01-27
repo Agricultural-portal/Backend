@@ -24,4 +24,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     long countByRoleAndCreatedAtAfter(com.pm.farm_backend.enums.Role role,
             java.time.LocalDateTime date);
+
+    java.util.List<User> findTop5ByRoleOrderByCreatedAtDesc(com.pm.farm_backend.enums.Role role);
 }

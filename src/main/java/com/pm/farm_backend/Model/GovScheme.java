@@ -32,4 +32,17 @@ public class GovScheme {
 
     private boolean isActive;
     
-    }
+    // Additional getters/setters for compatibility
+    public String getSchemeName() { return schemeName; }
+    public void setSchemeName(String schemeName) { this.schemeName = schemeName; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    public String getBenefits() { return benefits; }
+    public void setBenefits(String benefits) { this.benefits = benefits; }
+    public LocalDateTime getDeadline() { return deadline; }
+    public void setDeadline(LocalDateTime deadline) { this.deadline = deadline; }
+    public String getApplicationLink() { return applicationLink; }
+    public void setApplicationLink(String applicationLink) { this.applicationLink = applicationLink; }
+    public boolean isActive() { return isActive; }
+    public void setActive(boolean active) { isActive = active; }
+}

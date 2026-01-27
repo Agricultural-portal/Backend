@@ -56,4 +56,15 @@ public class Product {
         }
         this.stock -= quantity;
     }
+    
+    // Additional getters for compatibility
+    public Long getId() { return id; }
+    public String getName() { return name; }
+    public String getDescription() { return description; }
+    public BigDecimal getPrice() { return price; }
+    public Integer getStock() { return stock; }
+    public com.pm.farm_backend.enums.ProductUnit getUnit() { return unit; }
+    public ProductCategory getCategory() { return category; }
+    public String getImageUrl() { return imageUrl; }
+    public User getFarmer() { return farmer; }
 }

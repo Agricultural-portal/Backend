@@ -10,10 +10,11 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins(
+                .allowedOriginPatterns(
                         "http://localhost:5173",  // Vite dev server
                         "http://localhost:3000",  // Alternative React dev server
-                        "http://localhost:5174"   // Alternative Vite port
+                        "http://localhost:5174",  // Alternative Vite port
+                        "*"                       // Allow all origins with pattern
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")

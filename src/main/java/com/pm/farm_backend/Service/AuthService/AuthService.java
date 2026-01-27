@@ -9,6 +9,8 @@ import com.pm.farm_backend.Repositories.FarmerProfileRepository;
 import com.pm.farm_backend.Repositories.UserRepository;
 import com.pm.farm_backend.Security.Util.JwtService;
 import com.pm.farm_backend.Security.model.CustomUserDetails;
+import com.pm.farm_backend.Service.SystemSettingsService.SystemSettingsService;
+import com.pm.farm_backend.Dto.SystemSettingsResponse;
 import com.pm.farm_backend.enums.AccountStatus;
 import com.pm.farm_backend.enums.Role;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,9 @@ public class AuthService {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    private SystemSettingsService systemSettingsService;
+
     public void registerFarmer(FarmerSignupRequest dto) {
         if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
@@ -51,7 +56,10 @@ public class AuthService {
 
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setRole(Role.FARMER);
-        user.setStatus(AccountStatus.PENDING); // CHANGED TO PENDING
+        
+        // Check autoApproveFarmers setting
+        SystemSettingsResponse settings = systemSettingsService.getSettings();
+        user.setStatus(settings.getAutoApproveFarmers() ? AccountStatus.ACTIVE : AccountStatus.PENDING);
         user.setCity(dto.getCity());
         user.setState(dto.getState());
         user.setAddresss(dto.getAddresss());
@@ -84,7 +92,10 @@ public class AuthService {
         user.setPincode(dto.getPincode());
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setRole(Role.BUYER);
-        user.setStatus(AccountStatus.ACTIVE); // NO APPROVAL
+        
+        // Check autoApproveBuyers setting
+        SystemSettingsResponse settings = systemSettingsService.getSettings();
+        user.setStatus(settings.getAutoApproveBuyers() ? AccountStatus.ACTIVE : AccountStatus.PENDING);
 
         userRepository.save(user);
     }

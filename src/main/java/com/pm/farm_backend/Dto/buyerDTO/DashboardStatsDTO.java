@@ -11,4 +11,11 @@ public class DashboardStatsDTO {
     private BigDecimal totalSpent;
     private int cartItemsCount;
     private int favoritesCount;
+    
+    // Additional getters/setters for compatibility
+    public void setTotalOrders(int totalOrders) { this.totalOrders = totalOrders; }
+    public void setPendingOrders(long pendingOrders) { this.pendingOrders = pendingOrders; }
+    public void setInTransitOrders(long inTransitOrders) { this.inTransitOrders = inTransitOrders; }
+    public void setDeliveredOrders(long deliveredOrders) { this.deliveredOrders = deliveredOrders; }
+    public void setTotalSpent(BigDecimal totalSpent) { this.totalSpent = totalSpent; }
 }

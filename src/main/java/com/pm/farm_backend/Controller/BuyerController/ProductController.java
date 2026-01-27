@@ -4,15 +4,12 @@ import com.pm.farm_backend.Dto.buyerDTO.ProductDTO;
 import com.pm.farm_backend.enums.ProductCategory;
 import com.pm.farm_backend.Service.buyerService.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/buyer/products")
-@PreAuthorize("hasRole('BUYER')")
-@CrossOrigin(origins = "*")
 public class ProductController {
 
     @Autowired

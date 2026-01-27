@@ -42,7 +42,9 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         "/swagger-ui/**",
                                         "/v3/api-docs/**",
-                                        "/swagger-ui.html"
+                                        "/swagger-ui.html",
+                                        "/api/buyer/products/**",
+                                        "/api/buyer/products"
                                 ).permitAll()
                                 .requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -80,11 +82,12 @@ public class SecurityConfig {
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
                 
-                // Allow frontend origins
-                configuration.setAllowedOrigins(Arrays.asList(
+                // Use allowedOriginPatterns instead of allowedOrigins when allowCredentials is true
+                configuration.setAllowedOriginPatterns(Arrays.asList(
                         "http://localhost:5173",  // Vite dev server
                         "http://localhost:3000",  // Alternative React dev server
-                        "http://localhost:5174"   // Alternative Vite port
+                        "http://localhost:5174",  // Alternative Vite port
+                        "*"                       // Allow all origins with pattern
                 ));
                 
                 // Allow all HTTP methods

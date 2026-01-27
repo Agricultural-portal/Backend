@@ -12,7 +12,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/buyer/favorites")
 @PreAuthorize("hasRole('BUYER')")
-@CrossOrigin(origins = "*")
 public class FavoriteController {
 
     @Autowired
