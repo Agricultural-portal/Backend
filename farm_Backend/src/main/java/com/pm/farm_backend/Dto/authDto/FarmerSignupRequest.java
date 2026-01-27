@@ -1,5 +1,6 @@
 package com.pm.farm_backend.Dto.authDto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pm.farm_backend.enums.Role;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -12,10 +13,12 @@ import lombok.Data;
 public class FarmerSignupRequest {
 
     @NotBlank(message = "First Name is required")
-    private String first_name;
+    @JsonProperty("first_name")
+    private String firstName;
 
     @NotBlank(message = "Last Name is required")
-    private String last_name;
+    @JsonProperty("last_name")
+    private String lastName;
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")

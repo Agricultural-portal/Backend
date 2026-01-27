@@ -1,6 +1,6 @@
-package com.pm.farm_backend.Controller.AuthController;
+package com.pm.farm_backend.Controller.AdminController;
 
-import com.pm.farm_backend.DTO.SchemeRequest;
+import com.pm.farm_backend.Dto.SchemeRequest;
 import com.pm.farm_backend.Dto.OrderStatusUpdateRequest;
 import com.pm.farm_backend.Dto.authDto.UserUpdateRequest;
 import com.pm.farm_backend.Model.BankDetails;
@@ -33,6 +33,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMIN')")
+@CrossOrigin(origins = "*")
 public class AdminController {
 
     @Autowired
@@ -128,8 +129,8 @@ public class AdminController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Update basic fields
-        if (dto.getFirst_name() != null) user.setFirst_name(dto.getFirst_name());
-        if (dto.getLast_name() != null) user.setLast_name(dto.getLast_name());
+        if (dto.getFirstName() != null) user.setFirstName(dto.getFirstName());
+        if (dto.getLastName() != null) user.setLastName(dto.getLastName());
         if (dto.getEmail() != null) user.setEmail(dto.getEmail());
         if (dto.getPhone() != null) user.setPhone(dto.getPhone());
         if (dto.getAddresss() != null) user.setAddresss(dto.getAddresss());
@@ -334,4 +335,5 @@ public class AdminController {
         Map<String, String> response = new HashMap<>();
         response.put("message", "Scheme deleted successfully");
         return ResponseEntity.ok(response);
-    }}
+    }
+}

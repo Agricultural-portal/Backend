@@ -1,4 +1,4 @@
-package com.pm.farm_backend.DTO;
+package com.pm.farm_backend.Dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

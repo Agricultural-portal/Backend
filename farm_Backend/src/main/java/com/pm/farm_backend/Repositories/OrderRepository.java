@@ -15,4 +15,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     BigDecimal sumTotalAmount();
     
     long countByStatus(OrderStatus status);
+    
+    java.util.List<Order> findByUserId(Long userId);
 }

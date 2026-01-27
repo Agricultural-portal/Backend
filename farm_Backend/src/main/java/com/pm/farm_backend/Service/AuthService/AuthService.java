@@ -47,9 +47,9 @@ public class AuthService {
 
         User user = new User();
 
-        user.setFirst_name(dto.getFirst_name());
+        user.setFirstName(dto.getFirstName());
 
-        user.setLast_name(dto.getLast_name());
+        user.setLastName(dto.getLastName());
 
         user.setEmail(dto.getEmail());
         user.setPhone(dto.getPhone());
@@ -61,6 +61,7 @@ public class AuthService {
         SystemSettingsResponse settings = systemSettingsService.getSettings();
         user.setStatus(settings.getAutoApproveFarmers() ? AccountStatus.ACTIVE : AccountStatus.PENDING);
         
+        user.setStatus(AccountStatus.PENDING); // CHANGED TO PENDING
         user.setCity(dto.getCity());
         user.setState(dto.getState());
         user.setAddresss(dto.getAddresss());
@@ -82,8 +83,8 @@ public class AuthService {
         }
 
         User user = new User();
-        user.setFirst_name(dto.getFirst_name());
-        user.setLast_name(dto.getLast_name());
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
 
         user.setEmail(dto.getEmail());
         user.setPhone(dto.getPhone());
@@ -107,8 +108,8 @@ public class AuthService {
         }
 
         User user = new User();
-        user.setFirst_name(dto.getFirst_name());
-        user.setLast_name(dto.getLast_name());
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
         user.setEmail(dto.getEmail());
         user.setPhone(dto.getPhone());
         user.setAddresss(dto.getAddresss());
@@ -117,7 +118,7 @@ public class AuthService {
         user.setPincode(dto.getPincode());
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setRole(Role.ADMIN);
-        user.setStatus(AccountStatus.ACTIVE); // REQUIRES APPROVAL
+        user.setStatus(AccountStatus.PENDING); // REQUIRES APPROVAL
 
         userRepository.save(user);
     }

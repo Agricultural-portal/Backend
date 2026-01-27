@@ -1,14 +1,17 @@
 package com.pm.farm_backend.Dto.authDto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import lombok.Data;
 
 @Data
 public class UserUpdateRequest {
     
-    private String first_name;
+    @JsonProperty("first_name")
+    private String firstName;
     
-    private String last_name;
+    @JsonProperty("last_name")
+    private String lastName;
     
     @Email(message = "Invalid email format")
     private String email;

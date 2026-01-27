@@ -19,9 +19,11 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String first_name;
+    @Column(name = "first_name")
+    private String firstName;
 
-    private String Last_name;
+    @Column(name = "last_name")
+    private String lastName;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -60,4 +62,27 @@ public class User {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public String getFullName() {
+        return (firstName != null ? firstName : "") + " " + (lastName != null ? lastName : "");
+    }
+
+    public void setFullName(String fullName) {
+        if (fullName != null && fullName.contains(" ")) {
+            String[] parts = fullName.split(" ", 2);
+            this.firstName = parts[0];
+            this.lastName = parts[1];
+        } else {
+            this.firstName = fullName;
+            this.lastName = "";
+        }
+    }
+
+    public String getLocation() {
+        return this.addresss;
+    }
+
+    public void setLocation(String location) {
+        this.addresss = location;
+    }
 }

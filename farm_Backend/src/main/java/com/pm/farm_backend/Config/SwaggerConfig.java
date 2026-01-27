@@ -10,7 +10,8 @@ import org.springframework.context.annotation.Configuration;
         info = @Info(
                 title = "Farm Backend API",
                 version = "1.0"
-        )
+        ),
+        security = @io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "bearerAuth")
 )
 @SecurityScheme(
         name = "bearerAuth",

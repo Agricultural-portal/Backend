@@ -31,8 +31,9 @@ public class Product {
     @Column(nullable = false)
     private Integer stock;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String unit; // e.g., "kg", "quintal", "piece"
+    private com.pm.farm_backend.enums.ProductUnit unit; // e.g., KG, LITRE, DOZEN
 
     @Enumerated(EnumType.STRING)
     private ProductCategory category;
@@ -48,4 +49,11 @@ public class Product {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public void reduceStock(int quantity) {
+        if (this.stock < quantity) {
+            throw new RuntimeException("Insufficient stock for product: " + this.name);
+        }
+        this.stock -= quantity;
+    }
 }
