@@ -3,6 +3,7 @@ package com.pm.farm_backend.Controller.AuthController;
 import com.pm.farm_backend.Dto.LoginRequest;
 import com.pm.farm_backend.Dto.authDto.BuyerSignupRequest;
 import com.pm.farm_backend.Dto.authDto.FarmerSignupRequest;
+import com.pm.farm_backend.Model.User;
 import com.pm.farm_backend.Service.AuthService.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,20 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequest request) {
         String token = authService.login(request);
-        return ResponseEntity.ok(Map.of("token", token));
+        
+        // Get user details for response
+        User user = authService.getUserByEmail(request.getEmail());
+        
+        Map<String, Object> response = Map.of(
+            "token", token,
+            "id", user.getId(),
+            "firstName", user.getFirstName(),
+            "lastName", user.getLastName(),
+            "fullName", user.getFullName(), // Use the entity's method
+            "email", user.getEmail(),
+            "role", user.getRole().name()
+        );
+        
+        return ResponseEntity.ok(response);
     }
 }

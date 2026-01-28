@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,7 +48,11 @@ public class OrderService {
         order.setStatus(OrderStatus.PENDING);
         order.setPaymentStatus("PENDING"); // Fixed non-nullable field
         order.setShippingAddress(request.getShippingAddress());
-        order.setTotalAmount(cart.getTotalAmount());
+        
+        // Use totalAmount from request if provided (includes taxes/fees), otherwise use cart total
+        BigDecimal orderTotal = request.getTotalAmount() != null ? 
+            request.getTotalAmount() : cart.getTotalAmount();
+        order.setTotalAmount(orderTotal);
 
         List<OrderItem> orderItems = cart.getItems().stream().map(cartItem -> {
             OrderItem orderItem = new OrderItem();
@@ -79,7 +84,7 @@ public class OrderService {
         OrderHistoryDTO.OrderStats stats = new OrderHistoryDTO.OrderStats();
         stats.setTotalOrders(orders.size());
         stats.setPending(orders.stream().filter(o -> o.getStatus() == OrderStatus.PENDING).count());
-        stats.setInTransit(orders.stream().filter(o -> o.getStatus() == OrderStatus.IN_TRANSIT).count());
+        stats.setCancelled(orders.stream().filter(o -> o.getStatus() == OrderStatus.CANCELLED).count());
         stats.setDelivered(orders.stream().filter(o -> o.getStatus() == OrderStatus.DELIVERED).count());
         
         response.setStats(stats);
