@@ -207,8 +207,6 @@ public class AdminController {
     public ResponseEntity<Map<String, Long>> getOrderStats() {
         Map<String, Long> stats = new HashMap<>();
         stats.put("PENDING", orderRepo.countByStatus(OrderStatus.PENDING));
-        stats.put("APPROVED", orderRepo.countByStatus(OrderStatus.APPROVED));
-        stats.put("REJECTED", orderRepo.countByStatus(OrderStatus.REJECTED));
         stats.put("DELIVERED", orderRepo.countByStatus(OrderStatus.DELIVERED));
         stats.put("CANCELLED", orderRepo.countByStatus(OrderStatus.CANCELLED));
         stats.put("TOTAL", orderRepo.count());

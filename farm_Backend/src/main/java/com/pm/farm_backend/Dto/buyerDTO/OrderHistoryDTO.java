@@ -12,7 +12,7 @@ public class OrderHistoryDTO {
     public static class OrderStats {
         private long totalOrders;
         private long pending;
-        private long inTransit;
+        private long cancelled;
         private long delivered;
     }
 }

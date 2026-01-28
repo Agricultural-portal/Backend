@@ -1,6 +1,5 @@
 package com.pm.farm_backend.Dto.authDto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pm.farm_backend.enums.Role;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -12,11 +11,9 @@ import lombok.Data;
 public class AdminSignupRequest {
 
     @NotBlank(message = "First Name is required")
-    @JsonProperty("first_name")
     private String firstName;
 
     @NotBlank(message = "Last Name is required")
-    @JsonProperty("last_name")
     private String lastName;
 
     @NotBlank(message = "Email is required")

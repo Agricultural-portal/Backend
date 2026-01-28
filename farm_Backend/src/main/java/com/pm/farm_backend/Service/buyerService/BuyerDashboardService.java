@@ -36,7 +36,7 @@ public class BuyerDashboardService {
         DashboardStatsDTO stats = new DashboardStatsDTO();
         stats.setTotalOrders(orders.size());
         stats.setPendingOrders(orders.stream().filter(o -> o.getStatus() == OrderStatus.PENDING).count());
-        stats.setInTransitOrders(orders.stream().filter(o -> o.getStatus() == OrderStatus.IN_TRANSIT).count());
+        stats.setCancelledOrders(orders.stream().filter(o -> o.getStatus() == OrderStatus.CANCELLED).count());
         stats.setDeliveredOrders(orders.stream().filter(o -> o.getStatus() == OrderStatus.DELIVERED).count());
         
         BigDecimal totalSpent = orders.stream()
