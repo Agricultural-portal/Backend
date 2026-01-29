@@ -1,13 +1,22 @@
 package com.pm.farm_backend.Service.FarmerService;
 
+import com.pm.farm_backend.Dto.farmerDto.FarmerOrderItemDTO;
+import com.pm.farm_backend.Dto.farmerDto.FinancialTransactionDTO;
 import com.pm.farm_backend.Model.Order;
 import com.pm.farm_backend.Model.OrderItem;
-import com.pm.farm_backend.Repositories.OrderRepository;
+import com.pm.farm_backend.Model.Product;
 import com.pm.farm_backend.Repositories.OrderItemRepository;
+import com.pm.farm_backend.Repositories.OrderRepository;
+import com.pm.farm_backend.Repositories.ProductRepository;
+import com.pm.farm_backend.Repositories.UserRepository;
+import com.pm.farm_backend.enums.TransactionType;
+import com.pm.farm_backend.enums.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -15,14 +24,14 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
-    private final com.pm.farm_backend.Repositories.ProductRepository productRepository;
+    private final ProductRepository productRepository;
     private final FinanceService financeService;
-    private final com.pm.farm_backend.Repositories.UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public List<com.pm.farm_backend.Dto.farmerDto.FarmerOrderItemDTO> getOrdersForProduct(Long productId) {
+    public List<FarmerOrderItemDTO> getOrdersForProduct(Long productId) {
         List<OrderItem> items = orderItemRepository.findByProductId(productId);
-        return items.stream().map(item -> com.pm.farm_backend.Dto.farmerDto.FarmerOrderItemDTO.builder()
+        return items.stream().map(item -> FarmerOrderItemDTO.builder()
                 .id(item.getId())
                 .orderId(item.getOrder().getId())
                 .productName(item.getProduct().getName())
@@ -37,20 +46,20 @@ public class OrderServiceImpl implements OrderService {
                 .status(item.getOrder().getStatus().toString())
                 .paymentStatus(item.getOrder().getPaymentStatus())
                 .build())
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<com.pm.farm_backend.Dto.farmerDto.FarmerOrderItemDTO> getAllOrdersForFarmer(String email) {
+    public List<FarmerOrderItemDTO> getAllOrdersForFarmer(String email) {
         com.pm.farm_backend.Model.User farmer = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Farmer not found"));
 
-        if (farmer.getRole() != com.pm.farm_backend.enums.Role.FARMER) {
+        if (farmer.getRole() != Role.FARMER) {
             throw new RuntimeException("User is not a farmer");
         }
 
         List<OrderItem> items = orderItemRepository.findByProductFarmerId(farmer.getId());
-        return items.stream().map(item -> com.pm.farm_backend.Dto.farmerDto.FarmerOrderItemDTO.builder()
+        return items.stream().map(item -> FarmerOrderItemDTO.builder()
                 .id(item.getId())
                 .orderId(item.getOrder().getId())
                 .productName(item.getProduct().getName())
@@ -65,7 +74,7 @@ public class OrderServiceImpl implements OrderService {
                 .status(item.getOrder().getStatus().toString())
                 .paymentStatus(item.getOrder().getPaymentStatus())
                 .build())
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -163,7 +172,7 @@ public class OrderServiceImpl implements OrderService {
                     System.out.println(
                             "DEBUG: Processing item: " + item.getId() + ", Product ID: " + item.getProduct().getId());
                     // Fetch product to ensure we get the farmer details
-                    com.pm.farm_backend.Model.Product product = productRepository.findById(item.getProduct().getId())
+                    Product product = productRepository.findById(item.getProduct().getId())
                             .orElse(null);
 
                     if (product != null) {
@@ -179,12 +188,11 @@ public class OrderServiceImpl implements OrderService {
 
                         System.out.println("DEBUG: Creating transaction amount: " + incomeAmount);
 
-                        com.pm.farm_backend.Dto.farmerDto.FinancialTransactionDTO tx = com.pm.farm_backend.Dto.farmerDto.FinancialTransactionDTO
-                                .builder()
+                        FinancialTransactionDTO tx = FinancialTransactionDTO.builder()
                                 .amount(incomeAmount)
-                                .type(com.pm.farm_backend.enums.TransactionType.INCOME)
+                                .type(TransactionType.INCOME)
                                 .description("Income from Order #" + order.getId() + " - " + product.getName())
-                                .transactionDate(java.time.LocalDate.now())
+                                .transactionDate(LocalDate.now())
                                 .category("Product Sale")
                                 .userId(product.getFarmer().getId())
                                 .orderId(order.getId())

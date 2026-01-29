@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/farmer")
@@ -33,10 +34,10 @@ public class FarmerController {
     public ResponseEntity<Product> createProduct(
             @Valid @RequestBody ProductCreateRequest request,
             Authentication authentication) {
-        
+
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long farmerId = userDetails.getId();
-        
+
         Product product = farmerService.createProduct(request, farmerId);
         return ResponseEntity.ok(product);
     }
@@ -51,12 +52,12 @@ public class FarmerController {
             @RequestParam("category") String category,
             @RequestParam("image") MultipartFile image,
             Authentication authentication) {
-        
+
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long farmerId = userDetails.getId();
-        
+
         Product product = farmerService.createProductWithImage(
-            name, description, price, stock, unit, category, image, farmerId);
+                name, description, price, stock, unit, category, image, farmerId);
         return ResponseEntity.ok(product);
     }
 
@@ -64,7 +65,7 @@ public class FarmerController {
     public ResponseEntity<List<Product>> getMyProducts(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long farmerId = userDetails.getId();
-        
+
         List<Product> products = farmerService.getFarmerProducts(farmerId);
         return ResponseEntity.ok(products);
     }
@@ -73,10 +74,10 @@ public class FarmerController {
     public ResponseEntity<Product> getProduct(
             @PathVariable Long productId,
             Authentication authentication) {
-        
+
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long farmerId = userDetails.getId();
-        
+
         Product product = farmerService.getFarmerProduct(productId, farmerId);
         return ResponseEntity.ok(product);
     }
@@ -86,10 +87,10 @@ public class FarmerController {
             @PathVariable Long productId,
             @Valid @RequestBody ProductUpdateRequest request,
             Authentication authentication) {
-        
+
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long farmerId = userDetails.getId();
-        
+
         Product product = farmerService.updateProduct(productId, request, farmerId);
         return ResponseEntity.ok(product);
     }
@@ -99,10 +100,10 @@ public class FarmerController {
             @PathVariable Long productId,
             @RequestParam("image") MultipartFile image,
             Authentication authentication) {
-        
+
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long farmerId = userDetails.getId();
-        
+
         Product product = farmerService.updateProductImage(productId, image, farmerId);
         return ResponseEntity.ok(product);
     }
@@ -111,10 +112,10 @@ public class FarmerController {
     public ResponseEntity<Map<String, String>> deleteProduct(
             @PathVariable Long productId,
             Authentication authentication) {
-        
+
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long farmerId = userDetails.getId();
-        
+
         farmerService.deleteProduct(productId, farmerId);
         return ResponseEntity.ok(Map.of("message", "Product deleted successfully"));
     }
@@ -125,7 +126,7 @@ public class FarmerController {
     public ResponseEntity<List<Order>> getMyOrders(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long farmerId = userDetails.getId();
-        
+
         List<Order> orders = farmerService.getFarmerOrders(farmerId);
         return ResponseEntity.ok(orders);
     }
@@ -134,10 +135,10 @@ public class FarmerController {
     public ResponseEntity<Order> getOrder(
             @PathVariable Long orderId,
             Authentication authentication) {
-        
+
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long farmerId = userDetails.getId();
-        
+
         Order order = farmerService.getFarmerOrder(orderId, farmerId);
         return ResponseEntity.ok(order);
     }
@@ -147,10 +148,10 @@ public class FarmerController {
             @PathVariable Long orderId,
             @RequestParam String status,
             Authentication authentication) {
-        
+
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long farmerId = userDetails.getId();
-        
+
         farmerService.updateOrderStatus(orderId, status, farmerId);
         return ResponseEntity.ok(Map.of("message", "Order status updated successfully"));
     }
@@ -161,7 +162,7 @@ public class FarmerController {
     public ResponseEntity<FarmerDashboardStatsDTO> getDashboardStats(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long farmerId = userDetails.getId();
-        
+
         FarmerDashboardStatsDTO stats = farmerService.getFarmerDashboardStats(farmerId);
         return ResponseEntity.ok(stats);
     }
@@ -170,10 +171,10 @@ public class FarmerController {
     public ResponseEntity<Map<String, Object>> getMonthlySales(
             @RequestParam(required = false) Integer year,
             Authentication authentication) {
-        
+
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long farmerId = userDetails.getId();
-        
+
         Map<String, Object> sales = farmerService.getMonthlySales(farmerId, year);
         return ResponseEntity.ok(sales);
     }
@@ -184,7 +185,7 @@ public class FarmerController {
     public ResponseEntity<User> getProfile(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long farmerId = userDetails.getId();
-        
+
         User farmer = farmerService.getFarmerProfile(farmerId);
         return ResponseEntity.ok(farmer);
     }
@@ -193,11 +194,28 @@ public class FarmerController {
     public ResponseEntity<User> updateProfile(
             @Valid @RequestBody com.pm.farm_backend.Dto.authDto.UserUpdateRequest request,
             Authentication authentication) {
-        
+
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long farmerId = userDetails.getId();
-        
+
         User farmer = farmerService.updateFarmerProfile(farmerId, request);
         return ResponseEntity.ok(farmer);
+    }
+
+    @PostMapping("/profile/image")
+    public ResponseEntity<Map<String, String>> updateProfileImage(
+            @RequestParam("image") MultipartFile image,
+            Authentication authentication) {
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long farmerId = userDetails.getId();
+
+        User updatedUser = farmerService.updateFarmerProfileImage(farmerId, image);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Profile image updated successfully");
+        response.put("imageUrl", updatedUser.getProfileImageUrl());
+
+        return ResponseEntity.ok(response);
     }
 }

@@ -1,12 +1,13 @@
 package com.pm.farm_backend.Service.FarmerService;
 
+import com.pm.farm_backend.Dto.farmerDto.FarmerOrderItemDTO;
 import com.pm.farm_backend.Model.Order;
 import java.util.List;
 
 public interface OrderService {
-    List<com.pm.farm_backend.Dto.farmerDto.FarmerOrderItemDTO> getOrdersForProduct(Long productId);
+    List<FarmerOrderItemDTO> getOrdersForProduct(Long productId);
 
-    List<com.pm.farm_backend.Dto.farmerDto.FarmerOrderItemDTO> getAllOrdersForFarmer(String email);
+    List<FarmerOrderItemDTO> getAllOrdersForFarmer(String email);
 
     Order getOrderById(Long id);
 

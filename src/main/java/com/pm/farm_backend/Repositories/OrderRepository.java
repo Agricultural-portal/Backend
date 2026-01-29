@@ -26,5 +26,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT DISTINCT o FROM Order o JOIN o.items oi WHERE oi.product.farmer.id = :farmerId AND o.status = :status")
     List<Order> findByFarmerIdAndStatus(@Param("farmerId") Long farmerId, @Param("status") OrderStatus status);
 
+    @Query("SELECT COUNT(DISTINCT o) FROM Order o JOIN o.items oi WHERE oi.product.farmer.id = :farmerId AND o.status = :status")
+    Integer countByFarmerIdAndStatus(@Param("farmerId") Long farmerId, @Param("status") OrderStatus status);
+
     Integer countByUserIdAndStatus(Long userId, com.pm.farm_backend.enums.OrderStatus status);
 }

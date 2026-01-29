@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/farmers")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class FarmerRatingController {
 
     @Autowired
@@ -40,22 +40,36 @@ public class FarmerRatingController {
     }
 
     @GetMapping("/ratings/recent")
-    public ResponseEntity<List<FarmerRatingResponseDTO>> getRecentFarmerRatings(java.security.Principal principal) {
+    public ResponseEntity<?> getRecentFarmerRatings(java.security.Principal principal) {
+        if (principal == null) {
+            System.err.println("ERROR: Principal is null - user not authenticated");
+            return ResponseEntity.status(401).body("User not authenticated");
+        }
+
         String email = principal.getName();
         System.out.println("DEBUG: Fetching recent ratings (via token), email: " + email);
 
         try {
             com.pm.farm_backend.Model.User farmer = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("Farmer not found"));
+                    .orElseThrow(() -> new RuntimeException("Farmer not found with email: " + email));
             Long farmerId = farmer.getId();
+            System.out.println("DEBUG: Found farmer with ID: " + farmerId);
 
             List<FarmerRatingResponseDTO> recentRatings = ratingService.getRecentFarmerRatings(farmerId);
             System.out.println("DEBUG: Found " + recentRatings.size() + " recent ratings");
+
+            // Log first rating if exists
+            if (!recentRatings.isEmpty()) {
+                FarmerRatingResponseDTO first = recentRatings.get(0);
+                System.out.println("DEBUG: First rating - Buyer: " + first.getBuyerName() +
+                        ", Stars: " + first.getStars() + ", Comment: " + first.getComment());
+            }
+
             return ResponseEntity.ok(recentRatings);
         } catch (Exception e) {
             System.err.println("ERROR: Failed to fetch recent ratings: " + e.getMessage());
             e.printStackTrace();
-            throw e;
+            return ResponseEntity.status(500).body("Error fetching ratings: " + e.getMessage());
         }
     }
 }

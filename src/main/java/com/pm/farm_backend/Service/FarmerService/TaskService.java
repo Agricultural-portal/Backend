@@ -1,7 +1,6 @@
 package com.pm.farm_backend.Service.FarmerService;
 
 import com.pm.farm_backend.Dto.farmerDto.CreateTaskRequest;
-import com.pm.farm_backend.Dto.farmerDto.TaskDetailsDTO;
 import com.pm.farm_backend.Dto.farmerDto.TaskResponse;
 import com.pm.farm_backend.Model.Task;
 

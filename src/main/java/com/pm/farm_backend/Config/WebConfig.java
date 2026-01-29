@@ -13,8 +13,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOriginPatterns(
                         "http://localhost:5173", // Vite dev server
                         "http://localhost:3000", // Alternative React dev server
-                        "http://localhost:5174", // Alternative Vite port
-                        "*" // Allow all origins with pattern
+                        "http://localhost:5174",
+                        "*" // Alternative Vite port
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")

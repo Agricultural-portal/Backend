@@ -385,4 +385,20 @@ public class FarmerServiceImpl implements FarmerService {
 
         return userRepository.save(farmer);
     }
+
+    @Override
+    public User updateFarmerProfileImage(Long farmerId, MultipartFile image) {
+        User farmer = userRepository.findById(farmerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Farmer not found"));
+
+        String imageUrl;
+        try {
+            imageUrl = imageService.uploadImage(image);
+        } catch (IOException e) {
+            throw new BadRequestException("Failed to upload image: " + e.getMessage());
+        }
+
+        farmer.setProfileImageUrl(imageUrl);
+        return userRepository.save(farmer);
+    }
 }
