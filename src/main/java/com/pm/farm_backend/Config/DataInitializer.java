@@ -81,9 +81,12 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         // Create farmer users if not exist
-        createFarmerIfNotExists("farmer1@demo.com", "Rajesh", "Kumar", "Village Khanna", "Khanna", "Punjab", "141401", "5 acres", "Organic");
-        createFarmerIfNotExists("farmer2@demo.com", "Priya", "Sharma", "Village Ludhiana", "Ludhiana", "Punjab", "141002", "3 acres", "Traditional");
-        createFarmerIfNotExists("farmer3@demo.com", "Amit", "Singh", "Village Amritsar", "Amritsar", "Punjab", "143001", "7 acres", "Organic");
+        createFarmerIfNotExists("farmer1@demo.com", "Rajesh", "Kumar", "Village Khanna", "Khanna", "Punjab", "141401",
+                "5 acres", "Organic");
+        createFarmerIfNotExists("farmer2@demo.com", "Priya", "Sharma", "Village Ludhiana", "Ludhiana", "Punjab",
+                "141002", "3 acres", "Traditional");
+        createFarmerIfNotExists("farmer3@demo.com", "Amit", "Singh", "Village Amritsar", "Amritsar", "Punjab", "143001",
+                "7 acres", "Organic");
 
         // Create products if not exist
         // NOTE: Adding a few test products to verify backend integration
@@ -93,9 +96,9 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    private void createFarmerIfNotExists(String email, String firstName, String lastName, 
-                                       String address, String city, String state, String pincode,
-                                       String farmSize, String farmType) {
+    private void createFarmerIfNotExists(String email, String firstName, String lastName,
+            String address, String city, String state, String pincode,
+            String farmSize, String farmType) {
         if (userRepository.findByEmail(email).isEmpty()) {
             User farmer = new User();
             farmer.setFirstName(firstName);
@@ -127,44 +130,44 @@ public class DataInitializer implements CommandLineRunner {
 
         if (farmer1 != null) {
             // Product with NULL imageUrl - will show default image until farmer uploads
-            createProduct("Fresh Tomatoes", "Organic red tomatoes from farm", 
-                         new BigDecimal("80"), 100, ProductUnit.KG, ProductCategory.VEGETABLES,
-                         null, farmer1);
-            
+            createProduct("Fresh Tomatoes", "Organic red tomatoes from farm",
+                    new BigDecimal("80"), 100, ProductUnit.KG, ProductCategory.VEGETABLES,
+                    null, farmer1);
+
             // Product with NULL imageUrl - will show default image until farmer uploads
-            createProduct("Basmati Rice", "Premium quality basmati rice", 
-                         new BigDecimal("120"), 50, ProductUnit.KG, ProductCategory.GRAINS,
-                         null, farmer1);
+            createProduct("Basmati Rice", "Premium quality basmati rice",
+                    new BigDecimal("120"), 50, ProductUnit.KG, ProductCategory.GRAINS,
+                    null, farmer1);
         }
 
         if (farmer2 != null) {
             // Product with NULL imageUrl - will show default image until farmer uploads
-            createProduct("Fresh Spinach", "Organic green spinach leaves", 
-                         new BigDecimal("40"), 80, ProductUnit.KG, ProductCategory.VEGETABLES,
-                         null, farmer2);
-            
+            createProduct("Fresh Spinach", "Organic green spinach leaves",
+                    new BigDecimal("40"), 80, ProductUnit.KG, ProductCategory.VEGETABLES,
+                    null, farmer2);
+
             // Product with NULL imageUrl - will show default image until farmer uploads
-            createProduct("Wheat Flour", "Stone ground wheat flour", 
-                         new BigDecimal("60"), 200, ProductUnit.KG, ProductCategory.GRAINS,
-                         null, farmer2);
+            createProduct("Wheat Flour", "Stone ground wheat flour",
+                    new BigDecimal("60"), 200, ProductUnit.KG, ProductCategory.GRAINS,
+                    null, farmer2);
         }
 
         if (farmer3 != null) {
             // Product with NULL imageUrl - will show default image until farmer uploads
-            createProduct("Fresh Carrots", "Sweet orange carrots", 
-                         new BigDecimal("50"), 120, ProductUnit.KG, ProductCategory.VEGETABLES,
-                         null, farmer3);
-            
+            createProduct("Fresh Carrots", "Sweet orange carrots",
+                    new BigDecimal("50"), 120, ProductUnit.KG, ProductCategory.VEGETABLES,
+                    null, farmer3);
+
             // Product with NULL imageUrl - will show default image until farmer uploads
-            createProduct("Organic Apples", "Fresh red apples from organic farm", 
-                         new BigDecimal("150"), 60, ProductUnit.KG, ProductCategory.FRUITS,
-                         null, farmer3);
+            createProduct("Organic Apples", "Fresh red apples from organic farm",
+                    new BigDecimal("150"), 60, ProductUnit.KG, ProductCategory.FRUITS,
+                    null, farmer3);
         }
     }
 
-    private void createProduct(String name, String description, BigDecimal price, 
-                              Integer stock, ProductUnit unit, ProductCategory category,
-                              String imageUrl, User farmer) {
+    private void createProduct(String name, String description, BigDecimal price,
+            Integer stock, ProductUnit unit, ProductCategory category,
+            String imageUrl, User farmer) {
         Product product = new Product();
         product.setName(name);
         product.setDescription(description);
@@ -173,6 +176,7 @@ public class DataInitializer implements CommandLineRunner {
         product.setUnit(unit);
         product.setCategory(category);
         product.setImageUrl(imageUrl); // This can be NULL or actual URL
+        product.setStatus(com.pm.farm_backend.enums.ProductStatus.AVAILABLE);
         product.setFarmer(farmer);
         productRepository.save(product);
     }

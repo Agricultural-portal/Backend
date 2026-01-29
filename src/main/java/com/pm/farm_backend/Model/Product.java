@@ -1,6 +1,7 @@
 package com.pm.farm_backend.Model;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -14,6 +15,7 @@ import com.pm.farm_backend.Model.User; // make sure User is imported
 @Data
 @Entity
 @Table(name = "products")
+
 public class Product {
 
     @Id
@@ -38,6 +40,9 @@ public class Product {
     @Enumerated(EnumType.STRING)
     private ProductCategory category;
 
+    @Enumerated(EnumType.STRING)
+    private com.pm.farm_backend.enums.ProductStatus status;
+
     private String imageUrl;
 
     @ManyToOne
@@ -56,15 +61,45 @@ public class Product {
         }
         this.stock -= quantity;
     }
-    
+
     // Additional getters for compatibility
-    public Long getId() { return id; }
-    public String getName() { return name; }
-    public String getDescription() { return description; }
-    public BigDecimal getPrice() { return price; }
-    public Integer getStock() { return stock; }
-    public com.pm.farm_backend.enums.ProductUnit getUnit() { return unit; }
-    public ProductCategory getCategory() { return category; }
-    public String getImageUrl() { return imageUrl; }
-    public User getFarmer() { return farmer; }
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public com.pm.farm_backend.enums.ProductUnit getUnit() {
+        return unit;
+    }
+
+    public ProductCategory getCategory() {
+        return category;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public User getFarmer() {
+        return farmer;
+    }
+
+    public com.pm.farm_backend.enums.ProductStatus getStatus() {
+        return status;
+    }
 }

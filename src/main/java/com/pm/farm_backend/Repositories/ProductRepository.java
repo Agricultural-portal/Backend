@@ -13,10 +13,17 @@ import java.util.List;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByCategory(ProductCategory category);
+
     List<Product> findByNameContainingIgnoreCase(String name);
+
     List<Product> findByFarmer(User farmer);
+
     List<Product> findByFarmerId(Long farmerId);
-    
+
+    List<Product> findByFarmer_Id(Long farmerId);
+
+    List<Product> findByFarmer_IdAndStatus(Long farmerId, com.pm.farm_backend.enums.ProductStatus status);
+
     @Query("SELECT p FROM Product p WHERE p.farmer.id = :farmerId AND p.stock > 0")
     List<Product> findActiveProductsByFarmerId(@Param("farmerId") Long farmerId);
 }

@@ -9,8 +9,8 @@ import java.util.List;
 @Repository
 public interface GovSchemeRepository extends JpaRepository<GovScheme, Long> {
     List<GovScheme> findByIsActive(boolean isActive);
-    
+
     long countByIsActive(boolean isActive);
-    
+
     List<GovScheme> findBySchemeNameContainingIgnoreCase(String schemeName);
 }
