@@ -44,22 +44,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 userEmail = jwtService.extractUsername(jwt);
 
                 if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                        UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                        try {
+                                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-                        System.out.println("DEBUG JWT: Processing token for user: " + userEmail);
-                        System.out.println("DEBUG JWT: Loaded authorities: " + userDetails.getAuthorities());
-
-                        if (jwtService.isTokenValid(jwt, userDetails)) {
-                                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                                                userDetails,
-                                                null,
-                                                userDetails.getAuthorities());
-                                authToken.setDetails(
-                                                new WebAuthenticationDetailsSource().buildDetails(request));
-                                SecurityContextHolder.getContext().setAuthentication(authToken);
-                                System.out.println("DEBUG JWT: Authentication successful for " + userEmail);
-                        } else {
-                                System.out.println("DEBUG JWT: Token invalid for user " + userEmail);
+                                if (jwtService.isTokenValid(jwt, userDetails)) {
+                                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                                        userDetails,
+                                                        null,
+                                                        userDetails.getAuthorities());
+                                        authToken.setDetails(
+                                                        new WebAuthenticationDetailsSource().buildDetails(request));
+                                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                                }
+                        } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
+                                // User found in token (email) does not exist in DB (stale token).
+                                // Ignore and allow request to proceed as "Unauthenticated".
+                                // Spring Security will then return 401/403 for protected endpoints.
+                                System.out.println("Handled stale token for missing user: " + userEmail);
                         }
                 }
                 filterChain.doFilter(request, response);

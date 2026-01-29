@@ -38,21 +38,23 @@ public class SecurityConfig {
                 http
                                 .csrf(csrf -> csrf.disable())
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                        .authorizeHttpRequests(auth -> auth
-                                .requestMatchers(
-                                        "/swagger-ui/**",
-                                        "/v3/api-docs/**",
-                                        "/swagger-ui.html",
-                                        "/api/buyer/products/**",
-                                        "/api/buyer/products"
-                                ).permitAll()
-                                .requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                                .requestMatchers("/api/buyer/**").hasRole("BUYER")
-                                .requestMatchers("/api/farmer/**").hasRole("FARMER")
-                                .anyRequest().authenticated()
-                        )
-                        .sessionManagement(session -> session
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers(
+                                                                "/swagger-ui/**",
+                                                                "/v3/api-docs/**",
+                                                                "/swagger-ui.html",
+                                                                "/api/buyer/products/**",
+                                                                "/api/buyer/products")
+                                                .permitAll()
+                                                .requestMatchers("/api/auth/**").permitAll()
+                                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                                .requestMatchers("/api/buyer/**").hasRole("BUYER")
+                                                .requestMatchers("/api/tasks/**").authenticated()
+                                                .requestMatchers("/api/crop-cycles/**").authenticated()
+                                                .requestMatchers("/api/subtasks/**").authenticated()
+                                                .requestMatchers("/api/farmer/**").hasRole("FARMER")
+                                                .anyRequest().authenticated())
+                                .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authenticationProvider(authenticationProvider())
                                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -81,40 +83,38 @@ public class SecurityConfig {
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
-                
-                // Use allowedOriginPatterns instead of allowedOrigins when allowCredentials is true
+
+                // Use allowedOriginPatterns instead of allowedOrigins when allowCredentials is
+                // true
                 configuration.setAllowedOriginPatterns(Arrays.asList(
-                        "http://localhost:5173",  // Vite dev server
-                        "http://localhost:3000",  // Alternative React dev server
-                        "http://localhost:5174",  // Alternative Vite port
-                        "*"                       // Allow all origins with pattern
+                                "http://localhost:5173", // Vite dev server
+                                "http://localhost:3000", // Alternative React dev server
+                                "http://localhost:5174", // Alternative Vite port
+                                "*" // Allow all origins with pattern
                 ));
-                
+
                 // Allow all HTTP methods
                 configuration.setAllowedMethods(Arrays.asList(
-                        "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
-                ));
-                
+                                "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+
                 // Allow all headers
                 configuration.setAllowedHeaders(Arrays.asList(
-                        "Authorization",
-                        "Content-Type",
-                        "Accept",
-                        "Origin",
-                        "X-Requested-With"
-                ));
-                
+                                "Authorization",
+                                "Content-Type",
+                                "Accept",
+                                "Origin",
+                                "X-Requested-With"));
+
                 // Expose headers to frontend
                 configuration.setExposedHeaders(Arrays.asList(
-                        "Authorization"
-                ));
-                
+                                "Authorization"));
+
                 // Allow credentials (cookies, authorization headers)
                 configuration.setAllowCredentials(true);
-                
+
                 // Cache preflight response for 1 hour
                 configuration.setMaxAge(3600L);
-                
+
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
                 source.registerCorsConfiguration("/**", configuration);
                 return source;

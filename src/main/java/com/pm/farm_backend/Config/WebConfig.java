@@ -1,4 +1,4 @@
-package com.pm.farm_backend.config;
+package com.pm.farm_backend.Config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -11,10 +11,10 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
                 .allowedOriginPatterns(
-                        "http://localhost:5173",  // Vite dev server
-                        "http://localhost:3000",  // Alternative React dev server
-                        "http://localhost:5174",  // Alternative Vite port
-                        "*"                       // Allow all origins with pattern
+                        "http://localhost:5173", // Vite dev server
+                        "http://localhost:3000", // Alternative React dev server
+                        "http://localhost:5174", // Alternative Vite port
+                        "*" // Allow all origins with pattern
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
