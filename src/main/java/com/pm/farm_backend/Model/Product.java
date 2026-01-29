@@ -45,6 +45,12 @@ public class Product {
 
     private String imageUrl;
 
+    @Column
+    private Double averageRating = 0.0;
+
+    @Column
+    private Integer totalRatings = 0;
+
     @ManyToOne
     @JoinColumn(name = "farmer_id", nullable = false)
     private User farmer;

@@ -30,7 +30,7 @@ public class OrderService {
     public OrderDTO placeOrder(PlaceOrderRequest request, String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
+
         Cart cart = cartRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("Cart is empty"));
 
@@ -48,10 +48,10 @@ public class OrderService {
         order.setStatus(OrderStatus.PENDING);
         order.setPaymentStatus("PENDING"); // Fixed non-nullable field
         order.setShippingAddress(request.getShippingAddress());
-        
-        // Use totalAmount from request if provided (includes taxes/fees), otherwise use cart total
-        BigDecimal orderTotal = request.getTotalAmount() != null ? 
-            request.getTotalAmount() : cart.getTotalAmount();
+
+        // Use totalAmount from request if provided (includes taxes/fees), otherwise use
+        // cart total
+        BigDecimal orderTotal = request.getTotalAmount() != null ? request.getTotalAmount() : cart.getTotalAmount();
         order.setTotalAmount(orderTotal);
 
         List<OrderItem> orderItems = cart.getItems().stream().map(cartItem -> {
@@ -64,34 +64,37 @@ public class OrderService {
         }).collect(Collectors.toList());
 
         order.setItems(orderItems);
-        
+
         Order savedOrder = orderRepository.save(order);
-        
+
         // Clear cart
         cart.getItems().clear();
         cartRepository.save(cart);
 
         return mapToDTO(savedOrder);
     }
-    
+
     public OrderHistoryDTO getUserOrders(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         List<Order> orders = orderRepository.findByUserId(user.getId());
-        
+
         OrderHistoryDTO response = new OrderHistoryDTO();
-        
+
         OrderHistoryDTO.OrderStats stats = new OrderHistoryDTO.OrderStats();
         stats.setTotalOrders(orders.size());
         stats.setPending(orders.stream().filter(o -> o.getStatus() == OrderStatus.PENDING).count());
         stats.setCancelled(orders.stream().filter(o -> o.getStatus() == OrderStatus.CANCELLED).count());
         stats.setDelivered(orders.stream().filter(o -> o.getStatus() == OrderStatus.DELIVERED).count());
-        
+
         response.setStats(stats);
         response.setOrders(orders.stream().map(this::mapToDTO).collect(Collectors.toList()));
-        
+
         return response;
     }
+
+    @Autowired
+    private com.pm.farm_backend.Repositories.RatingRepository ratingRepository;
 
     private OrderDTO mapToDTO(Order order) {
         OrderDTO dto = new OrderDTO();
@@ -100,8 +103,21 @@ public class OrderService {
         dto.setTotalAmount(order.getTotalAmount());
         dto.setShippingAddress(order.getShippingAddress());
         dto.setCreatedAt(order.getCreatedAt());
+
+        // Check for rating
+        ratingRepository.findByOrderId(order.getId()).ifPresentOrElse(
+                rating -> {
+                    dto.setRated(true);
+                    dto.setRating(rating.getStars());
+                },
+                () -> {
+                    dto.setRated(false);
+                    dto.setRating(null);
+                });
+
         dto.setItems(order.getItems().stream().map(item -> {
             OrderDTO.OrderItemDTO itemDto = new OrderDTO.OrderItemDTO();
+            itemDto.setProductId(item.getProduct().getId());
             itemDto.setProductName(item.getProduct().getName());
             itemDto.setQuantity(item.getQuantity());
             itemDto.setPrice(item.getPriceAtPurchase());

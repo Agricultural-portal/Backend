@@ -22,7 +22,7 @@ public class RatingController {
     public void addRating(@RequestBody RatingRequest request, Authentication authentication) {
         ratingService.addRating(request, authentication.getName());
     }
-    
+
     @GetMapping("/product/{productId}")
     public List<Rating> getProductRatings(@PathVariable Long productId) {
         return ratingService.getProductRatings(productId);

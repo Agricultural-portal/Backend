@@ -13,10 +13,13 @@ public class OrderDTO {
     private BigDecimal totalAmount;
     private String shippingAddress;
     private LocalDateTime createdAt;
+    private boolean isRated;
+    private Integer rating;
     private List<OrderItemDTO> items;
 
     @Data
     public static class OrderItemDTO {
+        private Long productId;
         private String productName;
         private Integer quantity;
         private BigDecimal price;

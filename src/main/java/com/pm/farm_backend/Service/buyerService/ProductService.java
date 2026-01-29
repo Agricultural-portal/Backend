@@ -21,7 +21,8 @@ public class ProductService {
     }
 
     public List<ProductDTO> searchProducts(String query) {
-        return productRepository.findByNameContainingIgnoreCase(query).stream().map(this::mapToDTO).collect(Collectors.toList());
+        return productRepository.findByNameContainingIgnoreCase(query).stream().map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     public List<ProductDTO> getProductsByCategory(ProductCategory category) {
@@ -31,7 +32,7 @@ public class ProductService {
     public ProductDTO getProductById(Long id) {
         return productRepository.findById(id).map(this::mapToDTO).orElse(null);
     }
-    
+
     // Helper to map Entity to DTO
     private ProductDTO mapToDTO(Product product) {
         ProductDTO dto = new ProductDTO();
@@ -43,8 +44,12 @@ public class ProductService {
         dto.setUnit(product.getUnit());
         dto.setCategory(product.getCategory());
         dto.setImageUrl(product.getImageUrl());
+        dto.setAverageRating(product.getAverageRating());
+        dto.setTotalRatings(product.getTotalRatings());
         if (product.getFarmer() != null) {
             dto.setFarmerName(product.getFarmer().getFullName());
+            dto.setFarmerRating(product.getFarmer().getAverageRating());
+            dto.setFarmerTotalRatings(product.getFarmer().getTotalRatings());
         }
         return dto;
     }

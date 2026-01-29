@@ -1,6 +1,5 @@
 package com.pm.farm_backend.Dto.buyerDTO;
 
-
 import com.pm.farm_backend.enums.ProductCategory;
 import com.pm.farm_backend.enums.ProductUnit;
 import lombok.Data;
@@ -17,4 +16,8 @@ public class ProductDTO {
     private ProductCategory category;
     private String imageUrl;
     private String farmerName;
+    private Double averageRating;
+    private Integer totalRatings;
+    private Double farmerRating;
+    private Integer farmerTotalRatings;
 }

@@ -92,7 +92,7 @@ public class DataInitializer implements CommandLineRunner {
         // NOTE: Adding a few test products to verify backend integration
         // Products will be added by farmers later through farmer interface
         if (productRepository.count() == 0) {
-            createTestProducts();
+            // createTestProducts(); // Disabled to prevent dummy data
         }
     }
 

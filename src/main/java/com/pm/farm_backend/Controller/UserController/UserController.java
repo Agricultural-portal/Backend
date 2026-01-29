@@ -34,10 +34,10 @@ public class UserController {
     public ResponseEntity<?> getCurrentUserProfile() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
-        
+
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
+
         Map<String, Object> response = new java.util.HashMap<>();
         response.put("id", user.getId());
         response.put("firstName", user.getFirstName());
@@ -52,22 +52,31 @@ public class UserController {
         response.put("role", user.getRole().name());
         response.put("profileImageUrl", user.getProfileImageUrl());
         response.put("status", user.getStatus().name());
-        
+        response.put("averageRating", user.getAverageRating());
+        response.put("totalRatings", user.getTotalRatings());
+
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
     public User updateProfile(@PathVariable Long id, @RequestBody UserUpdateRequest userUpdates) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-        
-        if(userUpdates.getFirstName() != null) user.setFirstName(userUpdates.getFirstName());
-        if(userUpdates.getLastName() != null) user.setLastName(userUpdates.getLastName());
-        if(userUpdates.getPhone() != null) user.setPhone(userUpdates.getPhone());
-        if(userUpdates.getCity() != null) user.setCity(userUpdates.getCity());
-        if(userUpdates.getState() != null) user.setState(userUpdates.getState());
-        if(userUpdates.getAddresss() != null) user.setAddresss(userUpdates.getAddresss());
-        if(userUpdates.getPincode() != null) user.setPincode(userUpdates.getPincode());
-        
+
+        if (userUpdates.getFirstName() != null)
+            user.setFirstName(userUpdates.getFirstName());
+        if (userUpdates.getLastName() != null)
+            user.setLastName(userUpdates.getLastName());
+        if (userUpdates.getPhone() != null)
+            user.setPhone(userUpdates.getPhone());
+        if (userUpdates.getCity() != null)
+            user.setCity(userUpdates.getCity());
+        if (userUpdates.getState() != null)
+            user.setState(userUpdates.getState());
+        if (userUpdates.getAddresss() != null)
+            user.setAddresss(userUpdates.getAddresss());
+        if (userUpdates.getPincode() != null)
+            user.setPincode(userUpdates.getPincode());
+
         return userRepository.save(user);
     }
 
@@ -75,15 +84,14 @@ public class UserController {
     public ResponseEntity<?> uploadProfileImage(@PathVariable Long id, @RequestParam("image") MultipartFile file) {
         try {
             User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-            
+
             String imageUrl = imageService.uploadImage(file);
             user.setProfileImageUrl(imageUrl);
             userRepository.save(user);
-            
+
             return ResponseEntity.ok(Map.of(
-                "message", "Profile image updated successfully",
-                "imageUrl", imageUrl
-            ));
+                    "message", "Profile image updated successfully",
+                    "imageUrl", imageUrl));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", "Failed to upload image: " + e.getMessage()));
         }
@@ -94,7 +102,7 @@ public class UserController {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         user.setProfileImageUrl(null);
         userRepository.save(user);
-        
+
         return ResponseEntity.ok(Map.of("message", "Profile image removed successfully"));
     }
 

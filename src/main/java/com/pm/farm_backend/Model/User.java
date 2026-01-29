@@ -85,16 +85,51 @@ public class User {
     public void setLocation(String location) {
         this.addresss = location;
     }
-    
+
     // Additional getters/setters for compatibility
-    public Long getId() { return id; }
-    public Role getRole() { return role; }
-    public AccountStatus getStatus() { return status; }
-    public void setStatus(AccountStatus status) { this.status = status; }
-    public Boolean getIsDeleted() { return isDeleted; }
-    public void setIsDeleted(Boolean isDeleted) { this.isDeleted = isDeleted; }
-    public LocalDateTime getDeletedAt() { return deletedAt; }
-    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
-    public String getProfileImageUrl() { return profileImageUrl; }
-    public void setProfileImageUrl(String profileImageUrl) { this.profileImageUrl = profileImageUrl; }
+    public Long getId() {
+        return id;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public AccountStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(AccountStatus status) {
+        this.status = status;
+    }
+
+    public Boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
+
+    @Column
+    private Double averageRating = 0.0;
+
+    @Column
+    private Integer totalRatings = 0;
 }
