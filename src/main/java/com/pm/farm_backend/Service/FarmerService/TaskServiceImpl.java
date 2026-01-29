@@ -112,7 +112,7 @@ public class TaskServiceImpl implements TaskService {
                                                                 ? savedTask.getCropCycle().getId()
                                                                 : null)
                                                 .build();
-                                financeService.addTransaction(tx);
+                                financeService.addTransaction(user.getEmail(), tx);
                         } catch (Exception e) {
                                 System.err.println("Failed to auto-create expense for task: " + e.getMessage());
                                 e.printStackTrace();

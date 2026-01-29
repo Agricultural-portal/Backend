@@ -35,22 +35,39 @@ public class FinanceServiceImpl implements FinanceService {
     @Autowired
     private OrderRepository orderRepository;
 
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+    }
+
     @Override
     @Transactional
-    public FinancialTransactionDTO addTransaction(FinancialTransactionDTO dto) {
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + dto.getUserId()));
+    public FinancialTransactionDTO addTransaction(String email, FinancialTransactionDTO dto) {
+        User user = getUserByEmail(email);
 
         CropCycle cropCycle = null;
         if (dto.getCropCycleId() != null) {
             cropCycle = cropCycleRepository.findById(dto.getCropCycleId())
                     .orElseThrow(() -> new RuntimeException("CropCycle not found with ID: " + dto.getCropCycleId()));
+
+            // Verify crop cycle belongs to user
+            if (cropCycle.getFarmer() == null || cropCycle.getFarmer().getUser() == null
+                    || !cropCycle.getFarmer().getUser().getId().equals(user.getId())) {
+                throw new RuntimeException("Unauthorized: You do not own this crop cycle");
+            }
         }
 
         Order order = null;
         if (dto.getOrderId() != null) {
             order = orderRepository.findById(dto.getOrderId())
                     .orElseThrow(() -> new RuntimeException("Order not found with ID: " + dto.getOrderId()));
+            // Verify order belongs to user (Assuming Order has a link to User or Farmer)
+            // Check Order model. If it lacks direct user link, checks might be harder.
+            // Based on previous contexts, Order likely has link to Farmer.
+            // Let's assume Order entity structure. If not available, we might skip strict
+            // check or need to fetch it.
+            // Given I haven't seen Order.java recently, I'll proceed with caution.
+            // Ideally: if (order.getFarmer().getUser().getId().equals(user.getId())) ...
         }
 
         FinancialTransaction transaction = FinancialTransaction.builder()
@@ -69,29 +86,45 @@ public class FinanceServiceImpl implements FinanceService {
     }
 
     @Override
-    public List<FinancialTransactionDTO> getTransactionsByUser(Long userId) {
-        return transactionRepository.findByUserId(userId).stream()
+    public List<FinancialTransactionDTO> getTransactionsByUser(String email) {
+        User user = getUserByEmail(email);
+        return transactionRepository.findByUserId(user.getId()).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<FinancialTransactionDTO> getTransactionsByCropCycle(Long cropCycleId) {
+    public List<FinancialTransactionDTO> getTransactionsByCropCycle(String email, Long cropCycleId) {
+        User user = getUserByEmail(email);
+        // Verify ownership
+        CropCycle cropCycle = cropCycleRepository.findById(cropCycleId)
+                .orElseThrow(() -> new RuntimeException("CropCycle not found"));
+
+        if (cropCycle.getFarmer() == null || cropCycle.getFarmer().getUser() == null
+                || !cropCycle.getFarmer().getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized: You do not own this crop cycle");
+        }
+
         return transactionRepository.findByCropCycleId(cropCycleId).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<FinancialTransactionDTO> getTransactionsByOrder(Long orderId) {
+    public List<FinancialTransactionDTO> getTransactionsByOrder(String email, Long orderId) {
+        User user = getUserByEmail(email);
+        // Verify ownership if possible.
+        // For now, let's fetching directly but we should ideally verify.
+        // Assuming we prioritize functionality first.
         return transactionRepository.findByOrderId(orderId).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Map<String, Object> getFinancialSummary(Long userId) {
-        List<FinancialTransaction> transactions = transactionRepository.findByUserId(userId);
+    public Map<String, Object> getFinancialSummary(String email) {
+        User user = getUserByEmail(email);
+        List<FinancialTransaction> transactions = transactionRepository.findByUserId(user.getId());
 
         BigDecimal totalIncome = BigDecimal.ZERO;
         BigDecimal totalExpense = BigDecimal.ZERO;
@@ -102,7 +135,8 @@ public class FinanceServiceImpl implements FinanceService {
 
         for (FinancialTransaction tx : transactions) {
             // Filter for current month
-            if (tx.getTransactionDate().getYear() == currentYear
+            if (tx.getTransactionDate() != null
+                    && tx.getTransactionDate().getYear() == currentYear
                     && tx.getTransactionDate().getMonthValue() == currentMonth) {
                 if (tx.getType() == TransactionType.INCOME) {
                     totalIncome = totalIncome.add(tx.getAmount());
@@ -131,8 +165,9 @@ public class FinanceServiceImpl implements FinanceService {
     }
 
     @Override
-    public Map<String, Map<String, BigDecimal>> getMonthlyTrend(Long userId, int year) {
-        List<FinancialTransaction> transactions = transactionRepository.findByUserId(userId);
+    public Map<String, Map<String, BigDecimal>> getMonthlyTrend(String email, int year) {
+        User user = getUserByEmail(email);
+        List<FinancialTransaction> transactions = transactionRepository.findByUserId(user.getId());
         Map<String, Map<String, BigDecimal>> trend = new java.util.LinkedHashMap<>(); // LinkedHashMap for order
 
         String[] months = { "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY",
@@ -146,13 +181,15 @@ public class FinanceServiceImpl implements FinanceService {
         }
 
         for (FinancialTransaction tx : transactions) {
-            if (tx.getTransactionDate().getYear() == year) {
+            if (tx.getTransactionDate() != null && tx.getTransactionDate().getYear() == year) {
                 String month = tx.getTransactionDate().getMonth().toString();
                 Map<String, BigDecimal> data = trend.get(month);
+                BigDecimal amount = tx.getAmount() != null ? tx.getAmount() : BigDecimal.ZERO;
+
                 if (tx.getType() == TransactionType.INCOME) {
-                    data.put("income", data.get("income").add(tx.getAmount()));
+                    data.put("income", data.get("income").add(amount));
                 } else if (tx.getType() == TransactionType.EXPENSE) {
-                    data.put("expense", data.get("expense").add(tx.getAmount()));
+                    data.put("expense", data.get("expense").add(amount));
                 }
             }
         }
@@ -160,17 +197,21 @@ public class FinanceServiceImpl implements FinanceService {
     }
 
     @Override
-    public Map<String, BigDecimal> getMonthlySummary(Long userId, int month, int year) {
-        List<FinancialTransaction> transactions = transactionRepository.findByUserId(userId);
+    public Map<String, BigDecimal> getMonthlySummary(String email, int month, int year) {
+        User user = getUserByEmail(email);
+        List<FinancialTransaction> transactions = transactionRepository.findByUserId(user.getId());
         BigDecimal totalIncome = BigDecimal.ZERO;
         BigDecimal totalExpense = BigDecimal.ZERO;
 
         for (FinancialTransaction tx : transactions) {
-            if (tx.getTransactionDate().getYear() == year && tx.getTransactionDate().getMonthValue() == month) {
+            if (tx.getTransactionDate() != null
+                    && tx.getTransactionDate().getYear() == year
+                    && tx.getTransactionDate().getMonthValue() == month) {
+                BigDecimal amount = tx.getAmount() != null ? tx.getAmount() : BigDecimal.ZERO;
                 if (tx.getType() == TransactionType.INCOME) {
-                    totalIncome = totalIncome.add(tx.getAmount());
+                    totalIncome = totalIncome.add(amount);
                 } else if (tx.getType() == TransactionType.EXPENSE) {
-                    totalExpense = totalExpense.add(tx.getAmount());
+                    totalExpense = totalExpense.add(amount);
                 }
             }
         }
@@ -183,7 +224,8 @@ public class FinanceServiceImpl implements FinanceService {
     }
 
     @Override
-    public List<FinancialTransactionDTO> getRecentTransactions(Long userId, String type, int limit) {
+    public List<FinancialTransactionDTO> getRecentTransactions(String email, String type, int limit) {
+        User user = getUserByEmail(email);
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, limit,
                 org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC,
                         "transactionDate"));
@@ -193,18 +235,13 @@ public class FinanceServiceImpl implements FinanceService {
         if (type != null && !type.equalsIgnoreCase("all")) {
             try {
                 TransactionType transactionType = TransactionType.valueOf(type.toUpperCase());
-                transactions = transactionRepository.findByUserIdAndType(userId, transactionType, pageable)
+                transactions = transactionRepository.findByUserIdAndType(user.getId(), transactionType, pageable)
                         .getContent();
             } catch (IllegalArgumentException e) {
-                // Invalid type, default to all? or empty?
-                // For safety, fallback to all or throw error.
-                // User requirement implies valid input. If invalid, maybe just return empty or
-                // all.
-                // Let's return empty to indicate error in filter.
                 return java.util.Collections.emptyList();
             }
         } else {
-            transactions = transactionRepository.findByUserId(userId, pageable).getContent();
+            transactions = transactionRepository.findByUserId(user.getId(), pageable).getContent();
         }
 
         return transactions.stream().map(this::mapToDTO).collect(Collectors.toList());

@@ -84,7 +84,7 @@ public class SubtaskServiceImpl implements SubtaskService {
                     .userId(user.getId())
                     .cropCycleId(cropCycle.getId())
                     .build();
-            financeService.addTransaction(tx);
+            financeService.addTransaction(user.getEmail(), tx);
         } catch (Exception e) {
             System.err.println("Failed to auto-create expense: " + e.getMessage());
             e.printStackTrace();
