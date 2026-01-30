@@ -61,6 +61,7 @@ public class RatingService {
                 double roundedAverage = Math.round(average * 10.0) / 10.0;
                 System.out.println("DEBUG: Rounded average: " + roundedAverage);
 
+                product.setAverageRating(roundedAverage);
                 product.setTotalRatings(productRatings.size());
                 productRepository.save(product);
                 System.out.println("DEBUG: Product updated with new stats");

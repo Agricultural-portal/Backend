@@ -132,4 +132,27 @@ public class User {
 
     @Column
     private Integer totalRatings = 0;
+
+    // Transient fields for farmer-specific data
+    @Transient
+    private String farmSize;
+
+    @Transient
+    private String farmType;
+
+    public String getFarmSize() {
+        return farmSize;
+    }
+
+    public void setFarmSize(String farmSize) {
+        this.farmSize = farmSize;
+    }
+
+    public String getFarmType() {
+        return farmType;
+    }
+
+    public void setFarmType(String farmType) {
+        this.farmType = farmType;
+    }
 }

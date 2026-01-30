@@ -1,0 +1,11 @@
+[2026-01-30 16:55:15] User registration successful with email omkar@gmail.com having role FARMER
+[2026-01-30 16:55:26] User login successful with email omkar@gmail.com
+[2026-01-30 16:56:25] User registration successful with email omkar.p4905@gmail.com having role BUYER
+[2026-01-30 16:56:35] User login successful with email omkar.p4905@gmail.com
+[2026-01-30 16:57:34] User login successful with email omkar@gmail.com
+[2026-01-30 17:09:11] User login successful with email omkar.p4905@gmail.com
+[2026-01-30 17:09:34] User login successful with email omkar@gmail.com
+[2026-01-30 17:10:33] User login successful with email omkar.p4905@gmail.com
+[2026-01-30 17:11:13] User login successful with email omkar@gmail.com
+[2026-01-30 17:11:43] User login successful with email admin@demo.com
+[2026-01-30 17:13:54] User login successful with email omkar@gmail.com

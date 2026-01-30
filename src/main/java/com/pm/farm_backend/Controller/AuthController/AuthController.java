@@ -5,9 +5,12 @@ import com.pm.farm_backend.Dto.authDto.BuyerSignupRequest;
 import com.pm.farm_backend.Dto.authDto.FarmerSignupRequest;
 import com.pm.farm_backend.Model.User;
 import com.pm.farm_backend.Service.AuthService.AuthService;
+import com.pm.farm_backend.Service.FileLoggerService;
+import com.pm.farm_backend.Security.model.CustomUserDetails;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +24,9 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private FileLoggerService fileLoggerService;
 
     @PostMapping("/signup/farmer")
     public ResponseEntity<?> farmerSignup(@RequestBody @Valid FarmerSignupRequest dto) {
@@ -43,20 +49,28 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequest request) {
         String token = authService.login(request);
-        
+
         // Get user details for response
         User user = authService.getUserByEmail(request.getEmail());
-        
+
         Map<String, Object> response = Map.of(
-            "token", token,
-            "id", user.getId(),
-            "firstName", user.getFirstName(),
-            "lastName", user.getLastName(),
-            "fullName", user.getFullName(), // Use the entity's method
-            "email", user.getEmail(),
-            "role", user.getRole().name()
-        );
-        
+                "token", token,
+                "id", user.getId(),
+                "firstName", user.getFirstName(),
+                "lastName", user.getLastName(),
+                "fullName", user.getFullName(), // Use the entity's method
+                "email", user.getEmail(),
+                "role", user.getRole().name());
+
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            fileLoggerService.logLogout(userDetails.getUsername());
+        }
+        return ResponseEntity.ok("Logged out successfully");
     }
 }

@@ -344,8 +344,18 @@ public class FarmerServiceImpl implements FarmerService {
 
     @Override
     public User getFarmerProfile(Long farmerId) {
-        return userRepository.findById(farmerId)
+        User farmer = userRepository.findById(farmerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Farmer not found"));
+
+        // Populate transient fields from FarmerProfile
+        Optional<FarmerProfile> profileOpt = farmerProfileRepository.findByUser(farmer);
+        if (profileOpt.isPresent()) {
+            FarmerProfile profile = profileOpt.get();
+            farmer.setFarmSize(profile.getFarmSize());
+            farmer.setFarmType(profile.getFarmType());
+        }
+
+        return farmer;
     }
 
     @Override
@@ -380,6 +390,18 @@ public class FarmerServiceImpl implements FarmerService {
                 if (request.getFarmType() != null)
                     profile.setFarmType(request.getFarmType());
                 farmerProfileRepository.save(profile);
+
+                // Update transient fields in the User object
+                farmer.setFarmSize(profile.getFarmSize());
+                farmer.setFarmType(profile.getFarmType());
+            }
+        } else {
+            // Even if not updating, populate transient fields from existing profile
+            Optional<FarmerProfile> profileOpt = farmerProfileRepository.findByUser(farmer);
+            if (profileOpt.isPresent()) {
+                FarmerProfile profile = profileOpt.get();
+                farmer.setFarmSize(profile.getFarmSize());
+                farmer.setFarmType(profile.getFarmType());
             }
         }
 
