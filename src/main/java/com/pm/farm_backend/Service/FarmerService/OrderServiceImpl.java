@@ -38,7 +38,7 @@ public class OrderServiceImpl implements OrderService {
                 .productUnit(item.getProduct().getUnit().toString())
                 .productImageUrl(item.getProduct().getImageUrl())
                 .buyerName(
-                        item.getOrder().getUser() != null ? item.getOrder().getUser().getFullName() : "Unknown Buyer")
+                        item.getOrder().getUser() != null ? item.getOrder().getUser().getFirst_name() + " " + item.getOrder().getUser().getLast_name() : "Unknown Buyer")
                 .quantity(item.getQuantity())
                 .priceAtPurchase(item.getPriceAtPurchase())
                 .totalAmount(item.getPriceAtPurchase().multiply(java.math.BigDecimal.valueOf(item.getQuantity())))
@@ -66,7 +66,7 @@ public class OrderServiceImpl implements OrderService {
                 .productUnit(item.getProduct().getUnit().toString())
                 .productImageUrl(item.getProduct().getImageUrl())
                 .buyerName(
-                        item.getOrder().getUser() != null ? item.getOrder().getUser().getFullName() : "Unknown Buyer")
+                        item.getOrder().getUser() != null ? item.getOrder().getUser().getFirst_name() + " " + item.getOrder().getUser().getLast_name() : "Unknown Buyer")
                 .quantity(item.getQuantity())
                 .priceAtPurchase(item.getPriceAtPurchase())
                 .totalAmount(item.getPriceAtPurchase().multiply(java.math.BigDecimal.valueOf(item.getQuantity())))

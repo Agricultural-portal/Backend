@@ -56,9 +56,9 @@ public class AuthService {
 
             User user = new User();
 
-            user.setFirstName(dto.getFirstName());
+            user.setFirst_name(dto.getFirstName());
 
-            user.setLastName(dto.getLastName());
+            user.setLast_name(dto.getLastName());
 
             user.setEmail(dto.getEmail());
             user.setPhone(dto.getPhone());
@@ -102,8 +102,8 @@ public class AuthService {
             }
 
             User user = new User();
-            user.setFirstName(dto.getFirstName());
-            user.setLastName(dto.getLastName());
+            user.setFirst_name(dto.getFirstName());
+            user.setLast_name(dto.getLastName());
 
             user.setEmail(dto.getEmail());
             user.setPhone(dto.getPhone());
@@ -139,8 +139,8 @@ public class AuthService {
             }
 
             User user = new User();
-            user.setFirstName(dto.getFirstName());
-            user.setLastName(dto.getLastName());
+            user.setFirst_name(dto.getFirstName());
+            user.setLast_name(dto.getLastName());
             user.setEmail(dto.getEmail());
             user.setPhone(dto.getPhone());
             user.setAddresss(dto.getAddresss());

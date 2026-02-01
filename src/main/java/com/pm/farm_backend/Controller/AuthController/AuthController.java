@@ -56,9 +56,8 @@ public class AuthController {
         Map<String, Object> response = Map.of(
                 "token", token,
                 "id", user.getId(),
-                "firstName", user.getFirstName(),
-                "lastName", user.getLastName(),
-                "fullName", user.getFullName(), // Use the entity's method
+                "firstName", user.getFirst_name(),
+                "lastName", user.getLast_name(),
                 "email", user.getEmail(),
                 "role", user.getRole().name());
 

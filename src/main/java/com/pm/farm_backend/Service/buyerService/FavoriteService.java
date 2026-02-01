@@ -54,7 +54,7 @@ public class FavoriteService {
                     dto.setCategory(p.getCategory());
                     dto.setImageUrl(p.getImageUrl());
                     if (p.getFarmer() != null) {
-                        dto.setFarmerName(p.getFarmer().getFullName());
+                        dto.setFarmerName(p.getFarmer().getFirst_name() + " " + p.getFarmer().getLast_name());
                     }
                     return dto;
                 }).collect(Collectors.toList());

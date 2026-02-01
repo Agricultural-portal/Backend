@@ -1,5 +1,6 @@
 package com.pm.farm_backend.Service.ProfileService;
 
+import com.pm.farm_backend.Dto.AdminProfileDTO;
 import com.pm.farm_backend.Dto.authDto.UserUpdateRequest;
 import com.pm.farm_backend.Model.User;
 import com.pm.farm_backend.Repositories.UserRepository;
@@ -13,21 +14,22 @@ public class AdminProfileService {
     @Autowired
     private UserRepository userRepository;
 
-    public User getProfile(String email) {
-        return userRepository.findByEmail(email)
+    public AdminProfileDTO getProfile(String email) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        return convertToDTO(user);
     }
 
     @Transactional
-    public User updateProfile(String email, UserUpdateRequest request) {
+    public AdminProfileDTO updateProfile(String email, UserUpdateRequest request) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (request.getFirstName() != null) {
-            user.setFirstName(request.getFirstName());
+            user.setFirst_name(request.getFirstName());
         }
         if (request.getLastName() != null) {
-            user.setLastName(request.getLastName());
+            user.setLast_name(request.getLastName());
         }
         if (request.getPhone() != null) {
             user.setPhone(request.getPhone());
@@ -45,7 +47,8 @@ public class AdminProfileService {
             user.setPincode(request.getPincode());
         }
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return convertToDTO(savedUser);
     }
 
     @Transactional
@@ -55,5 +58,30 @@ public class AdminProfileService {
 
         user.setProfileImageUrl(imageUrl);
         userRepository.save(user);
+    }
+
+    private AdminProfileDTO convertToDTO(User user) {
+        AdminProfileDTO.AdminProfileDTOBuilder builder = AdminProfileDTO.builder()
+            .id(user.getId())
+            .first_name(user.getFirst_name())
+            .Last_name(user.getLast_name())
+            .email(user.getEmail())
+            .phone(user.getPhone())
+            .addresss(user.getAddresss())
+            .city(user.getCity())
+            .state(user.getState())
+            .pincode(user.getPincode())
+            .profileImageUrl(user.getProfileImageUrl())
+            .money(user.getMoney())
+            .createdAt(user.getCreatedAt());
+        
+        if (user.getAverageRating() != null) {
+            builder.averageRating(user.getAverageRating());
+        }
+        if (user.getTotalRatings() != null) {
+            builder.totalRatings(user.getTotalRatings());
+        }
+        
+        return builder.build();
     }
 }

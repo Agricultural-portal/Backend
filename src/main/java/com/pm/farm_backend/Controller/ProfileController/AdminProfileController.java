@@ -1,5 +1,6 @@
 package com.pm.farm_backend.Controller.ProfileController;
 
+import com.pm.farm_backend.Dto.AdminProfileDTO;
 import com.pm.farm_backend.Dto.authDto.UserUpdateRequest;
 import com.pm.farm_backend.Model.User;
 import com.pm.farm_backend.Service.ImageService;
@@ -29,10 +30,10 @@ public class AdminProfileController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> getProfile(Authentication authentication) {
+    public ResponseEntity<AdminProfileDTO> getProfile(Authentication authentication) {
         String email = authentication.getName();
-        User user = adminProfileService.getProfile(email);
-        return ResponseEntity.ok(user);
+        AdminProfileDTO profile = adminProfileService.getProfile(email);
+        return ResponseEntity.ok(profile);
     }
 
     @PutMapping
@@ -42,8 +43,8 @@ public class AdminProfileController {
             Authentication authentication) {
         try {
             String email = authentication.getName();
-            User updatedUser = adminProfileService.updateProfile(email, request);
-            return ResponseEntity.ok(updatedUser);
+            AdminProfileDTO updatedProfile = adminProfileService.updateProfile(email, request);
+            return ResponseEntity.ok(updatedProfile);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

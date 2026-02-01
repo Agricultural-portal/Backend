@@ -61,7 +61,7 @@ public class RatingService {
                 double roundedAverage = Math.round(average * 10.0) / 10.0;
                 System.out.println("DEBUG: Rounded average: " + roundedAverage);
 
-                product.setAverageRating(roundedAverage);
+                product.setAverageRating(java.math.BigDecimal.valueOf(roundedAverage));
                 product.setTotalRatings(productRatings.size());
                 productRepository.save(product);
                 System.out.println("DEBUG: Product updated with new stats");
@@ -81,7 +81,7 @@ public class RatingService {
                 System.out.println("DEBUG: Calculated farmer average: " + roundedFarmerAverage);
 
                 User farmer = product.getFarmer();
-                farmer.setAverageRating(roundedFarmerAverage);
+                farmer.setAverageRating(java.math.BigDecimal.valueOf(roundedFarmerAverage));
                 farmer.setTotalRatings(farmerRatings.size());
                 userRepository.save(farmer);
                 System.out.println("DEBUG: Farmer stats updated");
@@ -115,7 +115,7 @@ public class RatingService {
 
                         // Fetch Buyer Name
                         String buyerName = userRepository.findById(rating.getBuyerId())
-                                        .map(User::getFullName)
+                                        .map(user -> user.getFirst_name() + " " + user.getLast_name())
                                         .orElse("Unknown Buyer");
                         dto.setBuyerName(buyerName);
 

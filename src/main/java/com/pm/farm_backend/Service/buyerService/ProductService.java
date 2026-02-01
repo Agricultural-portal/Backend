@@ -44,11 +44,11 @@ public class ProductService {
         dto.setUnit(product.getUnit());
         dto.setCategory(product.getCategory());
         dto.setImageUrl(product.getImageUrl());
-        dto.setAverageRating(product.getAverageRating());
+        dto.setAverageRating(product.getAverageRating().doubleValue());
         dto.setTotalRatings(product.getTotalRatings());
         if (product.getFarmer() != null) {
-            dto.setFarmerName(product.getFarmer().getFullName());
-            dto.setFarmerRating(product.getFarmer().getAverageRating());
+            dto.setFarmerName(product.getFarmer().getFirst_name() + " " + product.getFarmer().getLast_name());
+            dto.setFarmerRating(product.getFarmer().getAverageRating().doubleValue());
             dto.setFarmerTotalRatings(product.getFarmer().getTotalRatings());
         }
         return dto;

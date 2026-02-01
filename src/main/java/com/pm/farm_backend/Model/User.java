@@ -19,11 +19,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "first_name")
-    private String firstName;
+    private String first_name;
 
-    @Column(name = "last_name")
-    private String lastName;
+    private String Last_name;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -63,96 +61,8 @@ public class User {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    public String getFullName() {
-        return (firstName != null ? firstName : "") + " " + (lastName != null ? lastName : "");
-    }
+    @Column(precision = 3, scale = 2)
+    private BigDecimal averageRating = BigDecimal.ZERO;
 
-    public void setFullName(String fullName) {
-        if (fullName != null && fullName.contains(" ")) {
-            String[] parts = fullName.split(" ", 2);
-            this.firstName = parts[0];
-            this.lastName = parts[1];
-        } else {
-            this.firstName = fullName;
-            this.lastName = "";
-        }
-    }
-
-    public String getLocation() {
-        return this.addresss;
-    }
-
-    public void setLocation(String location) {
-        this.addresss = location;
-    }
-
-    // Additional getters/setters for compatibility
-    public Long getId() {
-        return id;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public AccountStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(AccountStatus status) {
-        this.status = status;
-    }
-
-    public Boolean getIsDeleted() {
-        return isDeleted;
-    }
-
-    public void setIsDeleted(Boolean isDeleted) {
-        this.isDeleted = isDeleted;
-    }
-
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
-    }
-
-    public void setDeletedAt(LocalDateTime deletedAt) {
-        this.deletedAt = deletedAt;
-    }
-
-    public String getProfileImageUrl() {
-        return profileImageUrl;
-    }
-
-    public void setProfileImageUrl(String profileImageUrl) {
-        this.profileImageUrl = profileImageUrl;
-    }
-
-    @Column
-    private Double averageRating = 0.0;
-
-    @Column
     private Integer totalRatings = 0;
-
-    // Transient fields for farmer-specific data
-    @Transient
-    private String farmSize;
-
-    @Transient
-    private String farmType;
-
-    public String getFarmSize() {
-        return farmSize;
-    }
-
-    public void setFarmSize(String farmSize) {
-        this.farmSize = farmSize;
-    }
-
-    public String getFarmType() {
-        return farmType;
-    }
-
-    public void setFarmType(String farmType) {
-        this.farmType = farmType;
-    }
 }

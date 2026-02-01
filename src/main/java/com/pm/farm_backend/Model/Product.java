@@ -45,8 +45,8 @@ public class Product {
 
     private String imageUrl;
 
-    @Column
-    private Double averageRating = 0.0;
+    @Column(precision = 3, scale = 2)
+    private BigDecimal averageRating = BigDecimal.ZERO;
 
     @Column
     private Integer totalRatings = 0;

@@ -49,8 +49,8 @@ public class DataInitializer implements CommandLineRunner {
         // Create admin user if not exists
         if (userRepository.findByEmail("admin@demo.com").isEmpty()) {
             User admin = new User();
-            admin.setFirstName("System");
-            admin.setLastName("Admin");
+            admin.setFirst_name("System");
+            admin.setLast_name("Admin");
             admin.setEmail("admin@demo.com");
             admin.setPasswordHash(passwordEncoder.encode("admin123"));
             admin.setRole(Role.ADMIN);
@@ -66,8 +66,8 @@ public class DataInitializer implements CommandLineRunner {
         // Create buyer user if not exists
         if (userRepository.findByEmail("buyer@demo.com").isEmpty()) {
             User buyer = new User();
-            buyer.setFirstName("John");
-            buyer.setLastName("Smith");
+            buyer.setFirst_name("John");
+            buyer.setLast_name("Smith");
             buyer.setEmail("buyer@demo.com");
             buyer.setPasswordHash(passwordEncoder.encode("buyer123"));
             buyer.setRole(Role.BUYER);
@@ -101,8 +101,8 @@ public class DataInitializer implements CommandLineRunner {
             String farmSize, String farmType) {
         if (userRepository.findByEmail(email).isEmpty()) {
             User farmer = new User();
-            farmer.setFirstName(firstName);
-            farmer.setLastName(lastName);
+            farmer.setFirst_name(firstName);
+            farmer.setLast_name(lastName);
             farmer.setEmail(email);
             farmer.setPasswordHash(passwordEncoder.encode("farmer123"));
             farmer.setRole(Role.FARMER);

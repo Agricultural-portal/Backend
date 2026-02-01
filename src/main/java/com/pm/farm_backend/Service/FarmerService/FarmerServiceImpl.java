@@ -347,14 +347,6 @@ public class FarmerServiceImpl implements FarmerService {
         User farmer = userRepository.findById(farmerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Farmer not found"));
 
-        // Populate transient fields from FarmerProfile
-        Optional<FarmerProfile> profileOpt = farmerProfileRepository.findByUser(farmer);
-        if (profileOpt.isPresent()) {
-            FarmerProfile profile = profileOpt.get();
-            farmer.setFarmSize(profile.getFarmSize());
-            farmer.setFarmType(profile.getFarmType());
-        }
-
         return farmer;
     }
 
@@ -364,9 +356,9 @@ public class FarmerServiceImpl implements FarmerService {
                 .orElseThrow(() -> new ResourceNotFoundException("Farmer not found"));
 
         if (request.getFirstName() != null)
-            farmer.setFirstName(request.getFirstName());
+            farmer.setFirst_name(request.getFirstName());
         if (request.getLastName() != null)
-            farmer.setLastName(request.getLastName());
+            farmer.setLast_name(request.getLastName());
         if (request.getEmail() != null)
             farmer.setEmail(request.getEmail());
         if (request.getPhone() != null)
@@ -390,18 +382,6 @@ public class FarmerServiceImpl implements FarmerService {
                 if (request.getFarmType() != null)
                     profile.setFarmType(request.getFarmType());
                 farmerProfileRepository.save(profile);
-
-                // Update transient fields in the User object
-                farmer.setFarmSize(profile.getFarmSize());
-                farmer.setFarmType(profile.getFarmType());
-            }
-        } else {
-            // Even if not updating, populate transient fields from existing profile
-            Optional<FarmerProfile> profileOpt = farmerProfileRepository.findByUser(farmer);
-            if (profileOpt.isPresent()) {
-                FarmerProfile profile = profileOpt.get();
-                farmer.setFarmSize(profile.getFarmSize());
-                farmer.setFarmType(profile.getFarmType());
             }
         }
 

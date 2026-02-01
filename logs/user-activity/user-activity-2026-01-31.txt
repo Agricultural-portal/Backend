@@ -1,0 +1,17 @@
+[2026-01-31 11:07:03] User registration successful with email ajay@gmail.com having role BUYER
+[2026-01-31 11:07:53] User registration successful with email ajay1@gmail.com having role ADMIN
+[2026-01-31 11:08:01] User login failed with email ajay1@gmail.com - Reason: User is disabled
+[2026-01-31 11:08:22] User login failed with email ajay1@gmail.com - Reason: User is disabled
+[2026-01-31 11:11:41] User login successful with email ajay1@gmail.com
+[2026-01-31 11:27:58] User login failed with email ajay1@gmail.com - Reason: Invalid credentials
+[2026-01-31 11:28:19] User login successful with email ajay1@gmail.com
+[2026-01-31 11:29:40] User registration successful with email j@gmail.com having role FARMER
+[2026-01-31 11:32:18] User registration successful with email k having role BUYER
+[2026-01-31 11:48:59] User login successful with email ajay1@gmail.com
+[2026-01-31 12:16:34] User login failed with email farmer@demo.com - Reason: Invalid credentials
+[2026-01-31 12:26:34] User login successful with email ajay1@gmail.com
+[2026-01-31 12:45:37] User registration successful with email ajay3@gmail.com having role FARMER
+[2026-01-31 12:45:45] User login successful with email ajay3@gmail.com
+[2026-01-31 12:47:41] User registration successful with email ajay4@gmail.com having role BUYER
+[2026-01-31 12:47:46] User login successful with email ajay4@gmail.com
+[2026-01-31 12:49:41] User login successful with email ajay1@gmail.com

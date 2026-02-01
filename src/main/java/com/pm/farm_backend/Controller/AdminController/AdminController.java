@@ -1,5 +1,7 @@
 package com.pm.farm_backend.Controller.AdminController;
 
+import com.pm.farm_backend.Dto.AdminOrderDTO;
+import com.pm.farm_backend.Dto.AdminUserDTO;
 import com.pm.farm_backend.Dto.SchemeRequest;
 import com.pm.farm_backend.Dto.OrderStatusUpdateRequest;
 import com.pm.farm_backend.Dto.authDto.UserUpdateRequest;
@@ -7,8 +9,11 @@ import com.pm.farm_backend.Model.BankDetails;
 import com.pm.farm_backend.Model.FarmerProfile;
 import com.pm.farm_backend.Model.GovScheme;
 import com.pm.farm_backend.Model.Order;
+import com.pm.farm_backend.Model.OrderItem;
+import com.pm.farm_backend.Model.Product;
 import com.pm.farm_backend.Model.User;
 import com.pm.farm_backend.Repositories.BankDetailsRepository;
+import com.pm.farm_backend.Repositories.ProductRepository;
 import com.pm.farm_backend.Repositories.FarmerProfileRepository;
 import com.pm.farm_backend.Repositories.GovSchemeRepository;
 import com.pm.farm_backend.Repositories.OrderRepository;
@@ -29,6 +34,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -50,6 +56,9 @@ public class AdminController {
     @Autowired
     private GovSchemeRepository govSchemeRepo;
 
+    @Autowired
+    private ProductRepository productRepo;
+
     @PutMapping("/approve/{userId}")
     public ResponseEntity<?> approveUser(@PathVariable Long userId) {
 
@@ -69,13 +78,21 @@ public class AdminController {
     }
 
     @GetMapping("/farmers")
-    public ResponseEntity<java.util.List<User>> getAllFarmers() {
-        return ResponseEntity.ok(userRepo.findByRoleAndIsDeleted(com.pm.farm_backend.enums.Role.FARMER, false));
+    public ResponseEntity<java.util.List<AdminUserDTO>> getAllFarmers() {
+        java.util.List<User> farmers = userRepo.findByRoleAndIsDeleted(com.pm.farm_backend.enums.Role.FARMER, false);
+        java.util.List<AdminUserDTO> farmerDTOs = farmers.stream()
+            .map(this::convertToAdminUserDTO)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(farmerDTOs);
     }
 
     @GetMapping("/buyers")
-    public ResponseEntity<java.util.List<User>> getAllBuyers() {
-        return ResponseEntity.ok(userRepo.findByRoleAndIsDeleted(com.pm.farm_backend.enums.Role.BUYER, false));
+    public ResponseEntity<java.util.List<AdminUserDTO>> getAllBuyers() {
+        java.util.List<User> buyers = userRepo.findByRoleAndIsDeleted(com.pm.farm_backend.enums.Role.BUYER, false);
+        java.util.List<AdminUserDTO> buyerDTOs = buyers.stream()
+            .map(this::convertToAdminUserDTO)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(buyerDTOs);
     }
 
     @GetMapping("/count/total-farmers")
@@ -128,8 +145,8 @@ public class AdminController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Update basic fields
-        if (dto.getFirstName() != null) user.setFirstName(dto.getFirstName());
-        if (dto.getLastName() != null) user.setLastName(dto.getLastName());
+        if (dto.getFirstName() != null) user.setFirst_name(dto.getFirstName());
+        if (dto.getLastName() != null) user.setLast_name(dto.getLastName());
         if (dto.getEmail() != null) user.setEmail(dto.getEmail());
         if (dto.getPhone() != null) user.setPhone(dto.getPhone());
         if (dto.getAddresss() != null) user.setAddresss(dto.getAddresss());
@@ -187,8 +204,111 @@ public class AdminController {
     // ==================== ORDER MANAGEMENT ENDPOINTS ====================
 
     @GetMapping("/orders")
-    public ResponseEntity<java.util.List<Order>> getAllOrders() {
-        return ResponseEntity.ok(orderRepo.findAll());
+    public ResponseEntity<java.util.List<AdminOrderDTO>> getAllOrders() {
+        java.util.List<Order> orders = orderRepo.findAll();
+        
+        java.util.List<AdminOrderDTO> orderDTOs = orders.stream()
+            .map(this::convertToAdminOrderDTO)
+            .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(orderDTOs);
+    }
+    
+    private AdminUserDTO convertToAdminUserDTO(User user) {
+        String name = (user.getFirst_name() != null ? user.getFirst_name() : "") + 
+                      " " + 
+                      (user.getLast_name() != null ? user.getLast_name() : "");
+        name = name.trim();
+        
+        String location = "";
+        if (user.getCity() != null && user.getState() != null) {
+            location = user.getCity() + ", " + user.getState();
+        } else if (user.getCity() != null) {
+            location = user.getCity();
+        } else if (user.getState() != null) {
+            location = user.getState();
+        }
+        
+        AdminUserDTO.AdminUserDTOBuilder builder = AdminUserDTO.builder()
+            .id(user.getId())
+            .name(name)
+            .email(user.getEmail())
+            .phone(user.getPhone())
+            .location(location)
+            .status(user.getStatus())
+            .role(user.getRole())
+            .profileImageUrl(user.getProfileImageUrl())
+            .createdAt(user.getCreatedAt())
+            .addresss(user.getAddresss())
+            .city(user.getCity())
+            .state(user.getState())
+            .pincode(user.getPincode())
+            .money(user.getMoney());
+        
+        // Add rating info if available
+        if (user.getAverageRating() != null) {
+            builder.averageRating(user.getAverageRating().doubleValue());
+        }
+        if (user.getTotalRatings() != null) {
+            builder.totalRatings(user.getTotalRatings());
+        }
+        
+        // Add farmer-specific fields if user is a farmer
+        if (user.getRole() == Role.FARMER) {
+            Optional<FarmerProfile> profileOpt = farmerProfileRepo.findByUser(user);
+            if (profileOpt.isPresent()) {
+                FarmerProfile profile = profileOpt.get();
+                builder.farmSize(profile.getFarmSize())
+                       .farmType(profile.getFarmType());
+            }
+        }
+        
+        return builder.build();
+    }
+    
+    private AdminOrderDTO convertToAdminOrderDTO(Order order) {
+        User buyer = order.getUser();
+        
+        AdminOrderDTO.BuyerInfo buyerInfo = AdminOrderDTO.BuyerInfo.builder()
+            .id(buyer.getId())
+            .firstName(buyer.getFirst_name())
+            .lastName(buyer.getLast_name())
+            .email(buyer.getEmail())
+            .phone(buyer.getPhone())
+            .build();
+        
+        java.util.List<AdminOrderDTO.OrderItemInfo> itemInfos = order.getItems().stream()
+            .map(item -> {
+                User farmer = item.getProduct().getFarmer();
+                AdminOrderDTO.FarmerInfo farmerInfo = AdminOrderDTO.FarmerInfo.builder()
+                    .id(farmer.getId())
+                    .firstName(farmer.getFirst_name())
+                    .lastName(farmer.getLast_name())
+                    .email(farmer.getEmail())
+                    .build();
+                
+                return AdminOrderDTO.OrderItemInfo.builder()
+                    .id(item.getId())
+                    .productId(item.getProduct().getId())
+                    .productName(item.getProduct().getName())
+                    .quantity(item.getQuantity())
+                    .price(item.getPriceAtPurchase())
+                    .farmer(farmerInfo)
+                    .build();
+            })
+            .collect(Collectors.toList());
+        
+        return AdminOrderDTO.builder()
+            .id(order.getId())
+            .status(order.getStatus())
+            .totalAmount(order.getTotalAmount())
+            .shippingAddress(order.getShippingAddress())
+            .paymentStatus(order.getPaymentStatus())
+            .createdAt(order.getCreatedAt())
+            .updatedAt(order.getUpdatedAt())
+            .buyer(buyerInfo)
+            .items(itemInfos)
+            .build();
     }
 
     @PutMapping("/orders/{orderId}/status")

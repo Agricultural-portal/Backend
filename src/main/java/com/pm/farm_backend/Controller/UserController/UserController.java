@@ -40,9 +40,9 @@ public class UserController {
 
         Map<String, Object> response = new java.util.HashMap<>();
         response.put("id", user.getId());
-        response.put("firstName", user.getFirstName());
-        response.put("lastName", user.getLastName());
-        response.put("fullName", user.getFirstName() + " " + user.getLastName());
+        response.put("firstName", user.getFirst_name());
+        response.put("lastName", user.getLast_name());
+        response.put("fullName", user.getFirst_name() + " " + user.getLast_name());
         response.put("email", user.getEmail());
         response.put("phone", user.getPhone());
         response.put("city", user.getCity());
@@ -63,9 +63,9 @@ public class UserController {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
 
         if (userUpdates.getFirstName() != null)
-            user.setFirstName(userUpdates.getFirstName());
+            user.setFirst_name(userUpdates.getFirstName());
         if (userUpdates.getLastName() != null)
-            user.setLastName(userUpdates.getLastName());
+            user.setLast_name(userUpdates.getLastName());
         if (userUpdates.getPhone() != null)
             user.setPhone(userUpdates.getPhone());
         if (userUpdates.getCity() != null)
