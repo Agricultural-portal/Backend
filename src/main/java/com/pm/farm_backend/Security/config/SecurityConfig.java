@@ -49,10 +49,16 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/auth/**").permitAll()
                                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                                 .requestMatchers("/api/buyer/**").hasRole("BUYER")
-                                                .requestMatchers("/api/tasks/**").authenticated()
-                                                .requestMatchers("/api/crop-cycles/**").authenticated()
-                                                .requestMatchers("/api/subtasks/**").authenticated()
+                                                .requestMatchers("/api/dashboard/**").hasRole("FARMER")
+                                                .requestMatchers("/api/task/**").hasRole("FARMER")
+                                                .requestMatchers("/api/tasks/**").hasRole("FARMER")
+                                                .requestMatchers("/api/crop-cycle/**").hasRole("FARMER")
+                                                .requestMatchers("/api/crop-cycles/**").hasRole("FARMER")
+                                                .requestMatchers("/api/subtasks/**").hasRole("FARMER")
                                                 .requestMatchers("/api/farmer/**").hasRole("FARMER")
+                                                .requestMatchers("/api/finance/**").hasRole("FARMER")
+                                                .requestMatchers("/api/weather/**").authenticated()
+                                                .requestMatchers("/api/notifications/**").authenticated()
                                                 .anyRequest().authenticated())
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -90,7 +96,8 @@ public class SecurityConfig {
                                 "http://localhost:5173", // Vite dev server
                                 "http://localhost:3000", // Alternative React dev server
                                 "http://localhost:5174", // Alternative Vite port
-                                "*" // Allow all origins with pattern
+                                "http://localhost:*", // Any localhost port
+                                "http://127.0.0.1:*" // Localhost IP with any port
                 ));
 
                 // Allow all HTTP methods

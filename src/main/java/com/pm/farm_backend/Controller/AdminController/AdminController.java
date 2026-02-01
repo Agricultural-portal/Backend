@@ -2,6 +2,7 @@ package com.pm.farm_backend.Controller.AdminController;
 
 import com.pm.farm_backend.Dto.AdminOrderDTO;
 import com.pm.farm_backend.Dto.AdminUserDTO;
+import com.pm.farm_backend.Dto.CreateNotificationDto;
 import com.pm.farm_backend.Dto.SchemeRequest;
 import com.pm.farm_backend.Dto.OrderStatusUpdateRequest;
 import com.pm.farm_backend.Dto.authDto.UserUpdateRequest;
@@ -18,10 +19,14 @@ import com.pm.farm_backend.Repositories.FarmerProfileRepository;
 import com.pm.farm_backend.Repositories.GovSchemeRepository;
 import com.pm.farm_backend.Repositories.OrderRepository;
 import com.pm.farm_backend.Repositories.UserRepository;
+import com.pm.farm_backend.Service.NotificationService;
 import com.pm.farm_backend.enums.AccountStatus;
+import com.pm.farm_backend.enums.NotificationPriority;
+import com.pm.farm_backend.enums.NotificationType;
 import com.pm.farm_backend.enums.OrderStatus;
 import com.pm.farm_backend.enums.Role;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,6 +44,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMIN')")
+@Slf4j
 public class AdminController {
 
     @Autowired
@@ -59,6 +65,9 @@ public class AdminController {
     @Autowired
     private ProductRepository productRepo;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @PutMapping("/approve/{userId}")
     public ResponseEntity<?> approveUser(@PathVariable Long userId) {
 
@@ -67,6 +76,20 @@ public class AdminController {
 
         user.setStatus(AccountStatus.ACTIVE);
         userRepo.save(user);
+
+        // Create notification for user
+        try {
+            CreateNotificationDto notificationDto = new CreateNotificationDto();
+            notificationDto.setUserId(user.getId());
+            notificationDto.setType(NotificationType.SYSTEM);
+            notificationDto.setTitle("Account Approved");
+            notificationDto.setMessage("Your account has been approved by the administrator. You can now access all features.");
+            notificationDto.setPriority(NotificationPriority.HIGH);
+            notificationService.createNotification(notificationDto);
+            log.info("Notification created for user approval: {}", user.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to create notification for user approval: {}", e.getMessage());
+        }
 
         return ResponseEntity.ok("User approved");
     }
@@ -182,6 +205,21 @@ public class AdminController {
         user.setStatus(AccountStatus.SUSPENDED); // Also suspend the account
         
         userRepo.save(user);
+
+        // Create notification for user
+        try {
+            CreateNotificationDto notificationDto = new CreateNotificationDto();
+            notificationDto.setUserId(user.getId());
+            notificationDto.setType(NotificationType.SYSTEM);
+            notificationDto.setTitle("Account Suspended");
+            notificationDto.setMessage("Your account has been suspended by the administrator. Please contact support for more information.");
+            notificationDto.setPriority(NotificationPriority.HIGH);
+            notificationService.createNotification(notificationDto);
+            log.info("Notification created for user deletion: {}", user.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to create notification for user deletion: {}", e.getMessage());
+        }
+
         return ResponseEntity.ok("User marked as deleted successfully");
     }
 
@@ -198,6 +236,21 @@ public class AdminController {
         }
 
         userRepo.save(user);
+
+        // Create notification for user
+        try {
+            CreateNotificationDto notificationDto = new CreateNotificationDto();
+            notificationDto.setUserId(user.getId());
+            notificationDto.setType(NotificationType.SYSTEM);
+            notificationDto.setTitle("Account Status Changed");
+            notificationDto.setMessage("Your account status has been changed to " + user.getStatus() + " by the administrator.");
+            notificationDto.setPriority(NotificationPriority.HIGH);
+            notificationService.createNotification(notificationDto);
+            log.info("Notification created for status toggle: {}", user.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to create notification for status toggle: {}", e.getMessage());
+        }
+
         return ResponseEntity.ok("User status updated to " + user.getStatus());
     }
 
@@ -417,6 +470,28 @@ public class AdminController {
         scheme.setActive(request.getDeadline() != null && request.getDeadline().isAfter(now));
         
         GovScheme savedScheme = govSchemeRepo.save(scheme);
+
+        // Notify all farmers about new scheme
+        try {
+            java.util.List<User> farmers = userRepo.findByRoleAndStatus(Role.FARMER, AccountStatus.ACTIVE);
+            farmers.forEach(farmer -> {
+                try {
+                    CreateNotificationDto notificationDto = new CreateNotificationDto();
+                    notificationDto.setUserId(farmer.getId());
+                    notificationDto.setType(NotificationType.SCHEME);
+                    notificationDto.setTitle("New Government Scheme Available");
+                    notificationDto.setMessage("A new government scheme '" + savedScheme.getSchemeName() + "' is now available. Check it out!");
+                    notificationDto.setPriority(NotificationPriority.MEDIUM);
+                    notificationService.createNotification(notificationDto);
+                } catch (Exception e) {
+                    log.error("Failed to create notification for farmer: {}", e.getMessage());
+                }
+            });
+            log.info("Notifications created for new scheme: {}", savedScheme.getSchemeName());
+        } catch (Exception e) {
+            log.error("Failed to create scheme notifications: {}", e.getMessage());
+        }
+
         return ResponseEntity.ok(savedScheme);
     }
 

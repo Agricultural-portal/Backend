@@ -22,6 +22,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 public class AuthService {
 
@@ -73,6 +75,7 @@ public class AuthService {
             user.setState(dto.getState());
             user.setAddresss(dto.getAddresss());
             user.setPincode(dto.getPincode());
+            user.setMoney(new BigDecimal("10000.00")); // Set default wallet balance
 
             User savedUser = userRepository.save(user);
 
@@ -117,9 +120,10 @@ public class AuthService {
             // Check autoApproveBuyers setting
             SystemSettingsResponse settings = systemSettingsService.getSettings();
             user.setStatus(settings.getAutoApproveBuyers() ? AccountStatus.ACTIVE : AccountStatus.PENDING);
+            user.setMoney(new BigDecimal("10000.00")); // Default wallet balance
 
             userRepository.save(user);
-
+            
             // Log successful registration
             fileLoggerService.logRegistrationSuccess(dto.getEmail(), "BUYER");
         } catch (DuplicateResourceException e) {
@@ -150,9 +154,10 @@ public class AuthService {
             user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
             user.setRole(Role.ADMIN);
             user.setStatus(AccountStatus.PENDING); // REQUIRES APPROVAL
+            user.setMoney(new BigDecimal("10000.00")); // Default wallet balance
 
             userRepository.save(user);
-
+            
             // Log successful registration
             fileLoggerService.logRegistrationSuccess(dto.getEmail(), "ADMIN");
         } catch (DuplicateResourceException e) {

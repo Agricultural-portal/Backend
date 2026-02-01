@@ -48,7 +48,7 @@ public class User {
     private String profileImageUrl;
 
     @Column(precision = 10, scale = 2)
-    private BigDecimal money = BigDecimal.ZERO;
+    private BigDecimal money = new BigDecimal("10000.00");
 
     @Column(nullable = false)
     private Boolean isDeleted = false;
