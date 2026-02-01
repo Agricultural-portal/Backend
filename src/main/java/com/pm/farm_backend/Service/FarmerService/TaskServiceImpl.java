@@ -1,5 +1,6 @@
 package com.pm.farm_backend.Service.FarmerService;
 
+import com.pm.farm_backend.Dto.CreateNotificationDto;
 import com.pm.farm_backend.Dto.farmerDto.CreateTaskRequest;
 import com.pm.farm_backend.Dto.farmerDto.TaskResponse;
 import com.pm.farm_backend.Model.FarmerProfile;
@@ -8,6 +9,10 @@ import com.pm.farm_backend.Model.User;
 import com.pm.farm_backend.Repositories.FarmerProfileRepository;
 import com.pm.farm_backend.Repositories.TaskRepository;
 import com.pm.farm_backend.Repositories.UserRepository;
+import com.pm.farm_backend.Service.NotificationService;
+import com.pm.farm_backend.enums.Category;
+import com.pm.farm_backend.enums.NotificationPriority;
+import com.pm.farm_backend.enums.NotificationType;
 import com.pm.farm_backend.enums.TaskStatus;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +35,8 @@ public class TaskServiceImpl implements TaskService {
         private UserRepository userRepository;
         @Autowired
         private com.pm.farm_backend.Repositories.CropCycleRepository cropCycleRepository;
+        @Autowired
+        private NotificationService notificationService;
         private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(TaskServiceImpl.class);
 
         @Autowired
@@ -119,6 +126,20 @@ public class TaskServiceImpl implements TaskService {
                         }
                 }
 
+                // Create notification for task creation
+                try {
+                        CreateNotificationDto notificationDto = new CreateNotificationDto();
+                        notificationDto.setUserId(user.getId());
+                        notificationDto.setType(NotificationType.TASK);
+                        notificationDto.setTitle("New Task Created");
+                        notificationDto.setMessage("Task '" + savedTask.getName() + "' has been created successfully");
+                        notificationDto.setPriority(NotificationPriority.MEDIUM);
+                        notificationService.createNotification(notificationDto);
+                        logger.info("Notification created for task: {}", savedTask.getName());
+                } catch (Exception e) {
+                        logger.error("Failed to create notification for task: {}", e.getMessage());
+                }
+
                 return savedTask;
         }
 
@@ -128,12 +149,12 @@ public class TaskServiceImpl implements TaskService {
 
                 List<Task> tasks;
                 if (category != null && !category.isEmpty()) {
-                        // Handle "Crop Cycle" -> "Crop_Cycle"
-                        String normalizedCategory = category.replace(" ", "_");
-                        tasks = taskRepository.findByFarmerAndCategory(farmer,
-                                        com.pm.farm_backend.enums.Category.valueOf(normalizedCategory));
+                        // Use the Category.fromString method to handle both "General" and "Crop Cycle"
+                        Category categoryEnum = Category.fromString(category);
+                        tasks = taskRepository.findByFarmerAndCategory(farmer, categoryEnum);
                 } else if (status != null && !status.isEmpty()) {
-                        tasks = taskRepository.findByFarmerAndStatus(farmer, TaskStatus.valueOf(status.toUpperCase()));
+                        TaskStatus statusEnum = TaskStatus.fromString(status);
+                        tasks = taskRepository.findByFarmerAndStatus(farmer, statusEnum);
                 } else {
                         tasks = taskRepository.findByFarmer(farmer);
                 }
@@ -149,9 +170,9 @@ public class TaskServiceImpl implements TaskService {
                         dto.setStartDate(task.getStartDate());
                         dto.setDueDate(task.getDueDate());
                         dto.setExpense(task.getExpense());
-                        dto.setCategory(task.getCategory() != null ? task.getCategory().name() : null);
-                        dto.setPriority(task.getPriority() != null ? task.getPriority().name() : null);
-                        dto.setStatus(task.getStatus() != null ? task.getStatus().name() : null);
+                        dto.setCategory(task.getCategory() != null ? task.getCategory().getDisplayName() : null);
+                        dto.setPriority(task.getPriority() != null ? task.getPriority().getValue() : null);
+                        dto.setStatus(task.getStatus() != null ? task.getStatus().getValue() : null);
                         if (task.getCropCycle() != null) {
                                 dto.setCropCycleId(task.getCropCycle().getId());
                                 dto.setCropCycleName(task.getCropCycle().getCropName());
@@ -178,9 +199,9 @@ public class TaskServiceImpl implements TaskService {
                 dto.setStartDate(task.getStartDate());
                 dto.setDueDate(task.getDueDate());
                 dto.setExpense(task.getExpense());
-                dto.setCategory(task.getCategory() != null ? task.getCategory().name() : null);
-                dto.setPriority(task.getPriority() != null ? task.getPriority().name() : null);
-                dto.setStatus(task.getStatus() != null ? task.getStatus().name() : null);
+                dto.setCategory(task.getCategory() != null ? task.getCategory().getDisplayName() : null);
+                dto.setPriority(task.getPriority() != null ? task.getPriority().getValue() : null);
+                dto.setStatus(task.getStatus() != null ? task.getStatus().getValue() : null);
                 if (task.getCropCycle() != null) {
                         dto.setCropCycleId(task.getCropCycle().getId());
                         dto.setCropCycleName(task.getCropCycle().getCropName());
@@ -236,6 +257,21 @@ public class TaskServiceImpl implements TaskService {
 
                 task.setStatus(TaskStatus.COMPLETED);
                 taskRepository.save(task);
+
+                // Create notification for task completion
+                try {
+                        User user = farmer.getUser();
+                        CreateNotificationDto notificationDto = new CreateNotificationDto();
+                        notificationDto.setUserId(user.getId());
+                        notificationDto.setType(NotificationType.TASK);
+                        notificationDto.setTitle("Task Completed");
+                        notificationDto.setMessage("Congratulations! Task '" + task.getName() + "' has been marked as completed");
+                        notificationDto.setPriority(NotificationPriority.HIGH);
+                        notificationService.createNotification(notificationDto);
+                        logger.info("Notification created for task completion: {}", task.getName());
+                } catch (Exception e) {
+                        logger.error("Failed to create notification for task completion: {}", e.getMessage());
+                }
         }
 
         @Override

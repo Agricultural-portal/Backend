@@ -4,16 +4,21 @@ import com.pm.farm_backend.Dto.farmerDto.ProductCreateRequest;
 import com.pm.farm_backend.Dto.farmerDto.ProductUpdateRequest;
 import com.pm.farm_backend.Dto.farmerDto.FarmerDashboardStatsDTO;
 import com.pm.farm_backend.Dto.authDto.UserUpdateRequest;
+import com.pm.farm_backend.Dto.CreateNotificationDto;
 import com.pm.farm_backend.Exception.ResourceNotFoundException;
 import com.pm.farm_backend.Exception.BadRequestException;
 import com.pm.farm_backend.Exception.UnauthorizedException;
 import com.pm.farm_backend.Model.*;
 import com.pm.farm_backend.Repositories.*;
 import com.pm.farm_backend.Service.ImageService;
+import com.pm.farm_backend.Service.NotificationService;
 import com.pm.farm_backend.enums.OrderStatus;
 import com.pm.farm_backend.enums.ProductCategory;
 import com.pm.farm_backend.enums.ProductUnit;
 import com.pm.farm_backend.enums.Role;
+import com.pm.farm_backend.enums.NotificationType;
+import com.pm.farm_backend.enums.NotificationPriority;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +33,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@Slf4j
 public class FarmerServiceImpl implements FarmerService {
 
     @Autowired
@@ -47,6 +53,9 @@ public class FarmerServiceImpl implements FarmerService {
 
     @Autowired
     private ImageService imageService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     // ==================== PRODUCT MANAGEMENT ====================
 
@@ -207,15 +216,117 @@ public class FarmerServiceImpl implements FarmerService {
 
     @Override
     public void updateOrderStatus(Long orderId, String status, Long farmerId) {
+        log.info("========================================");
+        log.info("UPDATE ORDER STATUS CALLED");
+        log.info("Order ID: {}, New Status: {}, Farmer ID: {}", orderId, status, farmerId);
+        log.info("========================================");
+        
         Order order = getFarmerOrder(orderId, farmerId);
+        log.info("Current order status: {}", order.getStatus());
 
         try {
-            OrderStatus orderStatus = OrderStatus.valueOf(status.toUpperCase());
-            order.setStatus(orderStatus);
+            OrderStatus newStatus = OrderStatus.valueOf(status.toUpperCase());
+            OrderStatus oldStatus = order.getStatus();
+            
+            log.info("Old Status: {}, New Status: {}", oldStatus, newStatus);
+            
+            // If order is being marked as DELIVERED, transfer money from buyer to farmers
+            if (newStatus == OrderStatus.DELIVERED && oldStatus != OrderStatus.DELIVERED) {
+                log.info("Conditions met for money transfer! Calling transferMoneyOnDelivery...");
+                transferMoneyOnDelivery(order);
+            } else {
+                log.warn("Money transfer NOT triggered. NewStatus={}, OldStatus={}", newStatus, oldStatus);
+            }
+            
+            order.setStatus(newStatus);
             orderRepository.save(order);
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Invalid order status: " + status);
         }
+    }
+
+    private void transferMoneyOnDelivery(Order order) {
+        log.info("=== Starting Money Transfer for Order #{} ===", order.getId());
+        User buyer = order.getUser();
+        BigDecimal totalAmount = order.getTotalAmount();
+        log.info("Order Total: ₹{}", totalAmount);
+
+        // Check if buyer has sufficient balance
+        BigDecimal buyerBalance = buyer.getMoney() != null ? buyer.getMoney() : BigDecimal.ZERO;
+        log.info("Buyer {} (ID: {}) Balance Before: ₹{}", buyer.getEmail(), buyer.getId(), buyerBalance);
+        
+        if (buyerBalance.compareTo(totalAmount) < 0) {
+            log.error("Insufficient balance! Required: ₹{}, Available: ₹{}", totalAmount, buyerBalance);
+            throw new BadRequestException("Buyer has insufficient wallet balance. Required: ₹" + totalAmount + ", Available: ₹" + buyerBalance);
+        }
+
+        // Deduct money from buyer
+        BigDecimal newBuyerBalance = buyerBalance.subtract(totalAmount);
+        buyer.setMoney(newBuyerBalance);
+        userRepository.save(buyer);
+        log.info("✓ Deducted ₹{} from buyer. New Balance: ₹{}", totalAmount, newBuyerBalance);
+        
+        // Send notification to buyer
+        try {
+            CreateNotificationDto buyerNotification = new CreateNotificationDto();
+            buyerNotification.setUserId(buyer.getId());
+            buyerNotification.setType(NotificationType.ORDER);
+            buyerNotification.setTitle("Payment Successful");
+            buyerNotification.setMessage("₹" + totalAmount + " has been deducted from your wallet for Order #" + order.getId());
+            buyerNotification.setPriority(NotificationPriority.HIGH);
+            notificationService.createNotification(buyerNotification);
+            log.info("Notification sent to buyer: {}", buyer.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to send notification to buyer: {}", e.getMessage());
+        }
+
+        // Transfer money to farmers based on items in the order
+        Map<User, BigDecimal> farmerAmounts = new HashMap<>();
+        
+        log.info("Processing {} order items...", order.getItems().size());
+        for (OrderItem item : order.getItems()) {
+            User farmer = item.getProduct().getFarmer();
+            BigDecimal itemTotal = item.getPriceAtPurchase().multiply(BigDecimal.valueOf(item.getQuantity()));
+            log.info("  Item: {} x {} @ ₹{} = ₹{} (Farmer: {})", 
+                item.getProduct().getName(), 
+                item.getQuantity(), 
+                item.getPriceAtPurchase(), 
+                itemTotal,
+                farmer.getEmail());
+            
+            farmerAmounts.merge(farmer, itemTotal, BigDecimal::add);
+        }
+
+        // Add money to each farmer's wallet
+        log.info("Crediting {} farmer(s)...", farmerAmounts.size());
+        for (Map.Entry<User, BigDecimal> entry : farmerAmounts.entrySet()) {
+            User farmer = entry.getKey();
+            BigDecimal amount = entry.getValue();
+            
+            BigDecimal farmerBalanceBefore = farmer.getMoney() != null ? farmer.getMoney() : BigDecimal.ZERO;
+            BigDecimal farmerBalanceAfter = farmerBalanceBefore.add(amount);
+            farmer.setMoney(farmerBalanceAfter);
+            userRepository.save(farmer);
+            
+            log.info("✓ Credited ₹{} to Farmer {} (ID: {}). Balance: ₹{} → ₹{}", 
+                amount, farmer.getEmail(), farmer.getId(), farmerBalanceBefore, farmerBalanceAfter);
+            
+            // Send notification to farmer
+            try {
+                CreateNotificationDto farmerNotification = new CreateNotificationDto();
+                farmerNotification.setUserId(farmer.getId());
+                farmerNotification.setType(NotificationType.ORDER);
+                farmerNotification.setTitle("Payment Received");
+                farmerNotification.setMessage("You received ₹" + amount + " for Order #" + order.getId());
+                farmerNotification.setPriority(NotificationPriority.HIGH);
+                notificationService.createNotification(farmerNotification);
+                log.info("Notification sent to farmer: {}", farmer.getEmail());
+            } catch (Exception e) {
+                log.error("Failed to send notification to farmer: {}", e.getMessage());
+            }
+        }
+        
+        log.info("=== Money Transfer Completed Successfully ===");
     }
 
     // ==================== DASHBOARD & ANALYTICS ====================

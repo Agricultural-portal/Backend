@@ -1,10 +1,15 @@
 package com.pm.farm_backend.Service.FarmerService;
 
+import com.pm.farm_backend.Dto.CreateNotificationDto;
 import com.pm.farm_backend.Model.Product;
 import com.pm.farm_backend.Model.User;
 import com.pm.farm_backend.Repositories.ProductRepository;
 import com.pm.farm_backend.Repositories.UserRepository;
+import com.pm.farm_backend.Service.NotificationService;
+import com.pm.farm_backend.enums.NotificationPriority;
+import com.pm.farm_backend.enums.NotificationType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,11 +17,13 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
+    private final NotificationService notificationService;
 
     @Override
     public com.pm.farm_backend.Dto.farmerDto.ProductResponseDTO addProduct(
@@ -49,6 +56,20 @@ public class ProductServiceImpl implements ProductService {
                 : com.pm.farm_backend.enums.ProductStatus.OUT_OF_STOCK);
 
         Product saved = productRepository.save(product);
+
+        // Create notification for product creation
+        try {
+            CreateNotificationDto notificationDto = new CreateNotificationDto();
+            notificationDto.setUserId(farmer.getId());
+            notificationDto.setType(NotificationType.PRODUCT);
+            notificationDto.setTitle("New Product Added");
+            notificationDto.setMessage("Your product '" + saved.getName() + "' has been added successfully");
+            notificationDto.setPriority(NotificationPriority.MEDIUM);
+            notificationService.createNotification(notificationDto);
+            log.info("Notification created for product: {}", saved.getName());
+        } catch (Exception e) {
+            log.error("Failed to create notification for product: {}", e.getMessage());
+        }
 
         com.pm.farm_backend.Dto.farmerDto.ProductResponseDTO response = new com.pm.farm_backend.Dto.farmerDto.ProductResponseDTO();
         response.setId(saved.getId());

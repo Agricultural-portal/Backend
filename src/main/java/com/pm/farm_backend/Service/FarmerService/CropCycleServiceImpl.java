@@ -1,8 +1,13 @@
 package com.pm.farm_backend.Service.FarmerService;
 
+import com.pm.farm_backend.Dto.CreateNotificationDto;
 import com.pm.farm_backend.Model.CropCycle;
 import com.pm.farm_backend.Repositories.CropCycleRepository;
+import com.pm.farm_backend.Service.NotificationService;
+import com.pm.farm_backend.enums.NotificationPriority;
+import com.pm.farm_backend.enums.NotificationType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,18 +15,37 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CropCycleServiceImpl implements CropCycleService {
 
     private final CropCycleRepository cropCycleRepository;
     private final com.pm.farm_backend.Repositories.FarmerProfileRepository farmerProfileRepository;
     private final com.pm.farm_backend.Repositories.UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Override
     public CropCycle createCropCycle(CropCycle cropCycle, String email) {
         com.pm.farm_backend.Model.FarmerProfile farmer = getFarmerByEmail(email);
         cropCycle.setFarmer(farmer);
         checkAndUpdateStatus(cropCycle);
-        return cropCycleRepository.save(cropCycle);
+        CropCycle saved = cropCycleRepository.save(cropCycle);
+
+        // Create notification for crop cycle creation
+        try {
+            com.pm.farm_backend.Model.User user = farmer.getUser();
+            CreateNotificationDto notificationDto = new CreateNotificationDto();
+            notificationDto.setUserId(user.getId());
+            notificationDto.setType(NotificationType.TASK);
+            notificationDto.setTitle("New Crop Cycle Started");
+            notificationDto.setMessage("Crop cycle for '" + saved.getCropName() + "' has been started successfully");
+            notificationDto.setPriority(NotificationPriority.HIGH);
+            notificationService.createNotification(notificationDto);
+            log.info("Notification created for crop cycle: {}", saved.getCropName());
+        } catch (Exception e) {
+            log.error("Failed to create notification for crop cycle: {}", e.getMessage());
+        }
+
+        return saved;
     }
 
     @Override

@@ -1,8 +1,11 @@
 package com.pm.farm_backend.Model;
 
 import com.pm.farm_backend.enums.Category;
+import com.pm.farm_backend.enums.CategoryConverter;
 import com.pm.farm_backend.enums.Priority;
+import com.pm.farm_backend.enums.PriorityConverter;
 import com.pm.farm_backend.enums.TaskStatus;
+import com.pm.farm_backend.enums.TaskStatusConverter;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,12 +44,12 @@ public class Task {
 
     private Double expense;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = CategoryConverter.class)
     private Category category;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = PriorityConverter.class)
     private Priority priority;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = TaskStatusConverter.class)
     private TaskStatus status;
 }

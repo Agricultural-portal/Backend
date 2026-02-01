@@ -9,6 +9,7 @@ import com.pm.farm_backend.Model.User;
 import com.pm.farm_backend.Service.FarmerService.FarmerService;
 import com.pm.farm_backend.Security.model.CustomUserDetails;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 @RestController
 @RequestMapping("/api/farmer")
 @PreAuthorize("hasRole('FARMER')")
+@Slf4j
 public class FarmerController {
 
     @Autowired
@@ -149,10 +151,17 @@ public class FarmerController {
             @RequestParam String status,
             Authentication authentication) {
 
+        log.info("=== CONTROLLER: Update Order Status Request ===");
+        log.info("Order ID: {}, Status: {}", orderId, status);
+        
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long farmerId = userDetails.getId();
+        
+        log.info("Farmer ID: {}, Email: {}", farmerId, userDetails.getUsername());
 
         farmerService.updateOrderStatus(orderId, status, farmerId);
+        
+        log.info("=== CONTROLLER: Order Status Updated Successfully ===");
         return ResponseEntity.ok(Map.of("message", "Order status updated successfully"));
     }
 

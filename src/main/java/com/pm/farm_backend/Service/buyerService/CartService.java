@@ -4,11 +4,16 @@ import com.pm.farm_backend.Model.Cart;
 import com.pm.farm_backend.Model.CartItem;
 import com.pm.farm_backend.Model.Product;
 import com.pm.farm_backend.Model.User;
+import com.pm.farm_backend.Dto.CreateNotificationDto;
 import com.pm.farm_backend.Dto.buyerDTO.AddToCartRequest;
 import com.pm.farm_backend.Dto.buyerDTO.CartDTO;
+import com.pm.farm_backend.Service.NotificationService;
+import com.pm.farm_backend.enums.NotificationPriority;
+import com.pm.farm_backend.enums.NotificationType;
 import com.pm.farm_backend.Repositories.CartRepository;
 import com.pm.farm_backend.Repositories.ProductRepository;
 import com.pm.farm_backend.Repositories.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class CartService {
 
     @Autowired
@@ -26,6 +32,8 @@ public class CartService {
     private ProductRepository productRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private NotificationService notificationService;
 
     @Transactional
     public CartDTO addToCart(AddToCartRequest request, String email) {
@@ -57,6 +65,21 @@ public class CartService {
         }
 
         Cart savedCart = cartRepository.save(cart);
+
+        // Create notification for adding item to cart
+        try {
+            CreateNotificationDto notificationDto = new CreateNotificationDto();
+            notificationDto.setUserId(user.getId());
+            notificationDto.setType(NotificationType.PRODUCT);
+            notificationDto.setTitle("Item Added to Cart");
+            notificationDto.setMessage(product.getName() + " (Quantity: " + request.getQuantity() + ") has been added to your cart");
+            notificationDto.setPriority(NotificationPriority.LOW);
+            notificationService.createNotification(notificationDto);
+            log.info("Notification created for cart item: {}", product.getName());
+        } catch (Exception e) {
+            log.error("Failed to create notification for cart: {}", e.getMessage());
+        }
+
         return mapToDTO(savedCart);
     }
 

@@ -1,5 +1,6 @@
 package com.pm.farm_backend.Service.FarmerService;
 
+import com.pm.farm_backend.Dto.CreateNotificationDto;
 import com.pm.farm_backend.Dto.farmerDto.FarmerOrderItemDTO;
 import com.pm.farm_backend.Dto.farmerDto.FinancialTransactionDTO;
 import com.pm.farm_backend.Model.Order;
@@ -9,9 +10,13 @@ import com.pm.farm_backend.Repositories.OrderItemRepository;
 import com.pm.farm_backend.Repositories.OrderRepository;
 import com.pm.farm_backend.Repositories.ProductRepository;
 import com.pm.farm_backend.Repositories.UserRepository;
+import com.pm.farm_backend.Service.NotificationService;
+import com.pm.farm_backend.enums.NotificationPriority;
+import com.pm.farm_backend.enums.NotificationType;
 import com.pm.farm_backend.enums.TransactionType;
 import com.pm.farm_backend.enums.Role;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -20,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
@@ -27,6 +33,7 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final FinanceService financeService;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Override
     public List<FarmerOrderItemDTO> getOrdersForProduct(Long productId) {
