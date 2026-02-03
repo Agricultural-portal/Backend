@@ -37,18 +37,18 @@ RUN mkdir -p /app/logs/user-activity && \
 # Switch to non-root user
 USER spring:spring
 
-# Expose application port
-EXPOSE 8080
+# Expose application port (can be overridden by PORT env var)
+EXPOSE ${PORT:-8080}
 
-# Health check
+# Health check (uses PORT env var if set)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8080/actuator/health || exit 1
+    CMD curl -f http://localhost:${PORT:-8080}/actuator/health || exit 1
 
 # Run the application
-ENTRYPOINT ["java", \
-    "-XX:+UseContainerSupport", \
-    "-XX:MaxRAMPercentage=75.0", \
-    "-Djava.security.egd=file:/dev/./urandom", \
-    "-Dspring.profiles.active=prod", \
-    "-jar", \
-    "app.jar"]
+ENTRYPOINT ["sh", "-c", "java \
+    -XX:+UseContainerSupport \
+    -XX:MaxRAMPercentage=75.0 \
+    -Djava.security.egd=file:/dev/./urandom \
+    -Dspring.profiles.active=prod \
+    -Dserver.port=${PORT:-8080} \
+    -jar app.jar"]
