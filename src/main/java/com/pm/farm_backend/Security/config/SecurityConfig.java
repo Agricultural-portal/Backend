@@ -100,7 +100,9 @@ public class SecurityConfig {
                                 "http://localhost:*", // Any localhost port
                                 "http://127.0.0.1:*", // Localhost IP with any port
                                 "https://*.up.railway.app", // Railway deployments
-                                "https://*.onrender.com" // Render deployments
+                                "https://*.onrender.com", // Render deployments
+                                "https://*.ngrok-free.app", // Ngrok tunnels
+                                "https://*.ngrok.io" // Ngrok alternative domain
                 ));
 
                 // Allow all HTTP methods
