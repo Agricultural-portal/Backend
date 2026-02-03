@@ -1,0 +1,49 @@
+# Maven
+target/
+!target/*.jar
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+.metadata
+
+# Logs
+logs/
+*.log
+boot_log.txt
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Documentation
+README.md
+*.md
+
+# SQL scripts
+*.sql

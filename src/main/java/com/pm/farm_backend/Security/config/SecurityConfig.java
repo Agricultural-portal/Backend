@@ -96,6 +96,7 @@ public class SecurityConfig {
                                 "http://localhost:5173", // Vite dev server
                                 "http://localhost:3000", // Alternative React dev server
                                 "http://localhost:5174", // Alternative Vite port
+                                "http://localhost", // Nginx proxy (port 80)
                                 "http://localhost:*", // Any localhost port
                                 "http://127.0.0.1:*" // Localhost IP with any port
                 ));
